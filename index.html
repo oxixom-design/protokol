@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#FDF2F8"/>
+<link rel="manifest" href="/manifest.json"/>
+<title>Мой протокол</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;height:100svh}
+body{background:#FDF2F8;font-family:system-ui,sans-serif;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;overflow:hidden}
+.hdr{background:#FDF2F8;padding:14px 16px 0;border-bottom:1px solid #FBCFE8;flex-shrink:0;z-index:10}
+.hdr-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.hdr h1{font-size:20px;font-weight:700;color:#1F2937}
+.hdr p{font-size:10px;color:#EC4899;letter-spacing:2px;text-transform:uppercase}
+.hdr-date{background:#FCE7F3;border:1px solid #FBCFE8;border-radius:10px;padding:5px 12px;text-align:right}
+.hdr-day{font-size:12px;font-weight:700;color:#BE185D}
+.hdr-d{font-size:10px;color:#9CA3AF}
+.tabs{display:flex;gap:4px;background:#FFF5F9;border-radius:12px;padding:4px;margin-bottom:10px}
+.tab{flex:1;padding:8px;border:none;border-radius:9px;background:none;color:#9CA3AF;cursor:pointer;font-size:12px;font-weight:500}
+.tab.on{background:linear-gradient(135deg,#EC4899,#7C3AED);color:#fff;font-weight:700}
+.con{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;padding-bottom:24px}
+/* progress */
+.prow{display:flex;justify-content:space-between;margin-bottom:6px}
+.prow span{font-size:13px;color:#6B7280}
+.prow b{font-size:14px;font-weight:700;color:#1F2937}
+.bar{height:6px;background:#FBCFE8;border-radius:4px;margin-bottom:14px;overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,#EC4899,#7C3AED);border-radius:4px;transition:width .4s}
+/* section */
+.sec{margin-bottom:10px}
+.sec-hdr{width:100%;border:none;border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;text-align:left}
+.sec-hdr.open{border-radius:12px 12px 0 0}
+.sec-t{font-size:14px;font-weight:700;color:#1F2937}
+.sec-s{font-size:11px;margin-top:2px}
+.sec-body{border-top:none;border-radius:0 0 12px 12px;background:#fff}
+/* item */
+.item{padding:11px 14px;display:flex;align-items:center;gap:10px;border-top:1px solid #FCE7F3}
+.item:first-child{border-top:none}
+.chk{width:24px;height:24px;border-radius:50%;border:2px solid #FBCFE8;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;cursor:pointer}
+.chk.on{color:#fff;font-weight:700}
+.iname{flex:1;font-size:14px;font-weight:500;color:#1F2937;cursor:pointer}
+.iname.done{text-decoration:line-through;color:#9CA3AF}
+.idose{font-size:12px;font-weight:600;padding:2px 8px;border-radius:8px;flex-shrink:0}
+.inote{font-size:11px;color:#9CA3AF;margin-top:2px;font-style:italic}
+.iwarn{color:#DC2626}
+.iedit{background:#FCE7F3;border:none;color:#BE185D;border-radius:7px;padding:4px 8px;cursor:pointer;font-size:11px;flex-shrink:0}
+/* todo */
+.todo-box{background:#FEF3C7;border:1px solid #D97706;border-radius:12px;padding:12px;margin-top:8px}
+.todo-t{font-size:13px;font-weight:700;color:#D97706;margin-bottom:8px}
+.todo-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid #FDE68A}
+/* card */
+.card{background:#fff;border:1px solid #FBCFE8;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px #EC489908}
+/* stats */
+.pct-box{background:linear-gradient(135deg,#FCE7F3,#EEF2FF);border:1px solid #FBCFE8;border-radius:14px;padding:20px;text-align:center;margin-bottom:14px}
+.pct-n{font-size:52px;font-weight:700;line-height:1}
+.stat-c{background:#fff;border:1px solid #FBCFE8;border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.stat-r{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px}
+.stat-b{height:5px;background:#FBCFE8;border-radius:4px;overflow:hidden}
+.stat-f{height:100%;border-radius:4px;transition:width .4s}
+/* manage */
+.mi{background:#fff;border:1px solid #FBCFE8;border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;box-shadow:0 1px 4px #EC489906}
+.mi-n{font-size:13px;font-weight:500;color:#1F2937;flex:1}
+.mi-d{font-size:11px;color:#9CA3AF;margin-top:1px}
+/* btns */
+.btn-pri{width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#EC4899,#7C3AED);color:#fff;cursor:pointer;font-size:14px;font-weight:700}
+.btn-sec{width:100%;padding:11px;border-radius:12px;border:1px solid #FBCFE8;background:#FFF5F9;color:#6B7280;cursor:pointer;font-size:14px}
+.btn-del{width:100%;padding:11px;border-radius:12px;border:1px solid #FEE2E2;background:#FEF2F2;color:#DC2626;cursor:pointer;font-size:13px;margin-top:8px}
+.btn-add{width:100%;padding:12px;border-radius:12px;border:1.5px dashed #EC4899;background:#FCE7F310;color:#EC4899;cursor:pointer;font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:6px}
+.fab{position:fixed;bottom:74px;right:16px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#EC4899,#7C3AED);border:none;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 20px #EC489960;display:flex;align-items:center;justify-content:center;z-index:60}
+/* bottom nav */
+.bnav{background:#fff;border-top:1px solid #FBCFE8;display:flex;flex-shrink:0;box-shadow:0 -2px 12px #EC489910}
+.bnav-btn{flex:1;padding:7px 0 11px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+.bnav-ic{font-size:18px}
+.bnav-lb{font-size:9px;color:#9CA3AF}
+.bnav-lb.on{color:#EC4899;font-weight:700}
+.bnav-dot{width:18px;height:3px;border-radius:2px;background:linear-gradient(90deg,#EC4899,#7C3AED)}
+/* lab */
+.lab-cats{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;margin-bottom:10px;padding-bottom:1px}
+.lab-cats::-webkit-scrollbar{display:none}
+.lab-cat{white-space:nowrap;padding:5px 11px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid #FBCFE8;background:#FFF5F9;color:#9CA3AF}
+.lab-cat.on{background:#EC4899;color:#fff;border-color:#EC4899}
+.lab-card{background:#fff;border:0.5px solid #FBCFE8;border-radius:11px;padding:11px 13px;margin-bottom:7px;cursor:pointer}
+.lab-card.warn{border-color:#FCA5A5;background:#FEF2F2}
+.lab-card.exp{background:#FFF5F9;border-color:#FBCFE8}
+.lab-row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.lab-name{font-size:13px;font-weight:500;color:#1F2937}
+.lab-name.w{color:#DC2626}
+.lab-val{font-size:14px;font-weight:500;color:#1F2937;text-align:right;white-space:nowrap}
+.lab-val.w{color:#DC2626}
+.lab-val.lo{color:#1D4ED8}
+.lab-sub{font-size:10px;color:#9CA3AF;margin-top:1px}
+.lab-sbar{height:3px;background:#E5E7EB;border-radius:2px;margin-top:7px;overflow:hidden}
+.lab-sfill{height:100%;border-radius:2px}
+.lab-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.lbadge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500}
+.lb-warn{background:#FEE2E2;color:#991B1B}
+.lb-low{background:#DBEAFE;color:#1E40AF}
+.lb-ok{background:#D1FAE5;color:#065F46}
+.lb-trend{background:#EEF2FF;color:#3730A3}
+.lab-exp{margin-top:9px;padding-top:9px;border-top:1px solid #FCE7F3}
+.lab-hist{display:flex;justify-content:space-between;font-size:11px;padding:3px 7px;border-radius:5px;margin-bottom:2px}
+.lab-chart{position:relative;height:100px;margin:8px 0}
+.lab-rec{background:#FEF3C7;border:1px solid #D97706;border-radius:8px;padding:9px 11px;margin-top:9px}
+.lab-rec-t{font-size:11px;font-weight:500;color:#92400E;margin-bottom:5px}
+.lab-rec-r{font-size:11px;color:#92400E;padding:1px 0 1px 12px;position:relative}
+.lab-rec-r::before{content:"→";position:absolute;left:0}
+.lab-warn-sum{background:#FEF2F2;border:1px solid #FCA5A5;border-radius:10px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px;font-size:12px;color:#991B1B;font-weight:500}
+.lab-sec{font-size:10px;font-weight:500;color:#9CA3AF;letter-spacing:.8px;text-transform:uppercase;margin:10px 0 6px}
+.lcard{background:#fff;border:0.5px solid #FBCFE8;border-radius:12px;padding:11px 13px;margin-bottom:7px;cursor:pointer}
+.lcard.lw{border-color:#FCA5A5;background:#FEF2F2}
+.lcard.lx{background:#FFF5F9}
+.lbadge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500}
+.lb-warn{background:#FEE2E2;color:#991B1B}
+.lb-low{background:#DBEAFE;color:#1E40AF}
+.lb-ok{background:#D1FAE5;color:#065F46}
+.lb-trend{background:#EEF2FF;color:#3730A3}
+/* modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end}
+.modal-bg.show{display:flex}
+.modal-box{width:100%;max-width:500px;margin:0 auto;background:#fff;border-radius:22px 22px 0 0;padding:0 18px 44px;max-height:90vh;overflow-y:auto}
+.modal-handle{width:36px;height:4px;background:#FBCFE8;border-radius:2px;margin:12px auto 14px}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-title{font-size:16px;font-weight:700;color:#1F2937}
+.modal-close{background:#FCE7F3;border:none;color:#9CA3AF;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:16px}
+/* form */
+.fg{margin-bottom:12px}
+.fl{color:#6B7280;font-size:12px;margin-bottom:5px;display:block;font-weight:600}
+.fi{background:#FFF5F9;border:1px solid #FBCFE8;border-radius:10px;color:#1F2937;padding:10px 13px;width:100%;font-size:14px;outline:none}
+.fi:focus{border-color:#EC4899}
+textarea.fi{resize:none;min-height:70px}
+.fpills{display:flex;gap:6px;flex-wrap:wrap}
+.fpill{padding:7px 12px;border-radius:20px;border:1.5px solid #FBCFE8;background:#FFF5F9;color:#6B7280;cursor:pointer;font-size:12px}
+.fpill.on{border-color:#EC4899;background:#FCE7F3;color:#BE185D;font-weight:700}
+/* wish */
+.wish-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.wish-stat{background:#fff;border:1px solid #FBCFE8;border-radius:14px;padding:14px;text-align:center}
+.wish-n{font-size:28px;font-weight:700}
+.wish-l{font-size:12px;color:#6B7280}
+.wish-card{background:#fff;border:1px solid #FBCFE8;border-radius:14px;padding:12px;margin-bottom:8px}
+.wish-nm{font-size:14px;font-weight:700;color:#1F2937;margin-bottom:4px}
+.wish-nm.done{text-decoration:line-through;color:#9CA3AF}
+.wish-buy{width:100%;padding:8px;border-radius:10px;border:1px solid #D1FAE5;background:#F0FDF4;color:#059669;cursor:pointer;font-size:13px;font-weight:600;margin-top:8px}
+/* proto */
+.proto-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0}
+.proto-cell{background:#FFF5F9;border:1px solid #FBCFE8;border-radius:10px;padding:7px;text-align:center}
+.proto-cl{font-size:10px;color:#9CA3AF;margin-bottom:2px}
+.proto-cv{font-size:13px;font-weight:700}
+.days-row{display:flex;gap:4px;margin:10px 0}
+.day-chip{flex:1;padding:5px 0;border-radius:7px;text-align:center;font-size:10px;border:1px solid transparent}
+/* cycle tab */
+.cal-card{background:#fff;border:1px solid #FBCFE8;border-radius:14px;padding:14px;margin-bottom:10px}
+.cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.cal-nav-btn{background:#FCE7F3;border:none;color:#BE185D;border-radius:9px;width:34px;height:34px;cursor:pointer;font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.cal-month{font-size:15px;font-weight:700;color:#1F2937}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-dow{text-align:center;font-size:11px;color:#9CA3AF;padding:5px 0;font-weight:600}
+.cal-day{text-align:center;padding:7px 2px;border-radius:9px;font-size:13px;color:#374151;line-height:1}
+.cal-day.period{background:#FCE7F3;color:#BE185D;font-weight:700}
+.cal-day.cy-today{background:linear-gradient(135deg,#EC4899,#7C3AED);color:#fff;font-weight:700}
+.cal-day.period.cy-today{background:linear-gradient(135deg,#C94B6B,#EC4899);color:#fff}
+.cal-day.other{color:#D1D5DB}
+.tg-card{background:#fff;border:1px solid #FBCFE8;border-radius:14px;padding:4px 14px;margin-bottom:10px}
+.tg-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-top:1px solid #FCE7F3}
+.tg-row:first-child{border-top:none}
+.tg-left{flex:1}
+.tg-label{font-size:14px;font-weight:600;color:#1F2937}
+.tg-sub{font-size:12px;color:#9CA3AF;margin-top:2px}
+.tg-sw{width:52px;height:30px;border-radius:15px;background:#FBCFE8;cursor:pointer;position:relative;transition:background .25s;flex-shrink:0}
+.tg-sw.on{background:linear-gradient(135deg,#EC4899,#BE185D)}
+.tg-knob{width:24px;height:24px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:left .25s;box-shadow:0 1px 5px rgba(0,0,0,.18)}
+.tg-sw.on .tg-knob{left:25px}
+.ph-card{background:#fff;border:1px solid #FBCFE8;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;gap:16px;align-items:center}
+.ph-canvas-wrap{flex-shrink:0}
+.ph-info{flex:1;min-width:0}
+.ph-pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:8px}
+.ph-name{font-size:16px;font-weight:700;color:#1F2937;margin-bottom:4px}
+.ph-desc{font-size:13px;color:#6B7280;line-height:1.45;margin-bottom:6px}
+.ph-count{font-size:12px;color:#9CA3AF}
+.cyc-rec{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.cr-card{background:#fff;border:1px solid #FBCFE8;border-radius:12px;padding:12px}
+.cr-head{font-size:12px;font-weight:700;color:#6B7280;margin-bottom:8px}
+.cr-li{font-size:12px;color:#374151;margin:5px 0;padding-left:10px;position:relative;line-height:1.4}
+.cr-li::before{content:'·';position:absolute;left:0;color:#EC4899;font-size:18px;line-height:.85}
+</style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" async></script>
+<div class="hdr">
+  <div class="hdr-row">
+    <div><p id="hlabel">МОЙ ПРОТОКОЛ</p><h1 id="htitle">💊 Добавки</h1></div>
+    <div class="hdr-date"><div class="hdr-day" id="hday"></div><div class="hdr-d" id="hdate"></div></div>
+  </div>
+  <div class="tabs" id="stabs"></div>
+</div>
+<div class="con" id="con"></div>
+<nav class="bnav" id="bnav"></nav>
+<button class="fab" id="fab" onclick="openAdd()" style="display:none">+</button>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal" onclick="closeMod()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <span class="modal-title" id="mod-title"></span>
+      <button class="modal-close" onclick="closeMod()">&#10005;</button>
+    </div>
+    <div id="mod-body"></div>
+  </div>
+</div>
+
+<script>
+var LS={
+  get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function el(id){return document.getElementById(id);}
+function todayStr(){return new Date().toISOString().slice(0,10);}
+function uid(){return '_'+Math.random().toString(36).slice(2,8);}
+
+// DEFAULT DATA
+var DEF_SECS=[
+  {id:'s1',t:'🌙 Натощак',sub:'за 20-30 мин до завтрака',ac:'#7C3AED',items:[
+    {id:'i1',nm:'Коллаген морской',dose:'2 саше (10 г)',note:'растворить в воде',st:'active'},
+    {id:'i2',nm:'Глутатион липосомальный',dose:'150 мг',note:'растворить в воде',st:'active'},
+    {id:'i3',nm:'Спермидин',dose:'500 мг',st:'active'},
+    {id:'i4',nm:'Метиленовый синий',dose:'10 мг',note:'⚠️ не с СИОЗС!',st:'active',warn:1},
+    {id:'i5',nm:'OptiFibre',dose:'5 г',note:'растворить в воде',st:'active'},
+    {id:'i6',nm:'Глицин',dose:'1 г',st:'active'}
+  ]},
+  {id:'s2',t:'🍳 Завтрак',sub:'с едой — нужен жир!',ac:'#2563EB',items:[
+    {id:'i7',nm:'DIM + EGCG + D3',dose:'x2 капс. (DIM 300 мг)',note:'с жирной едой',st:'active'},
+    {id:'i8',nm:'B-комплекс',dose:'1 порция',note:'⚠️ B9 = 5-MTHF!',st:'active',warn:1},
+    {id:'i9',nm:'Витекс Священный',dose:'400 мг',note:'ТОЛЬКО утром!',st:'active'},
+    {id:'i10',nm:'Инозитол',dose:'1 стик (1-я порция)',st:'active'},
+    {id:'i12',nm:'Aquamin магний',dose:'по инструкции',st:'active'}
+  ]},
+  {id:'s3',t:'🥗 Обед',sub:'с едой — нужен жир!',ac:'#059669',items:[
+    {id:'i13',nm:'Омега-3 с имбирём',dose:'2 капс.',st:'active'},
+    {id:'i14',nm:'Куркумин + биоперин',dose:'2 капс.',note:'⚠️ отдели от лекарств на 2ч',st:'active',warn:1},
+    {id:'i15',nm:'Preventera Lixidan',dose:'1 порция (CoQ10 40мг)',st:'active'},
+    {id:'i17',nm:'Артишок + ALA',dose:'800+91 мг',st:'active'},
+    {id:'i18',nm:'Амла',dose:'2 капс. (600 мг)',st:'active'},
+    {id:'i19',nm:'Инозитол',dose:'1 стик (2-я порция)',st:'active'}
+  ]},
+  {id:'s4',t:'⏸️ Между едой',sub:'между обедом и ужином',ac:'#D97706',items:[]},
+  {id:'s5',t:'🌙 Ужин',sub:'с едой',ac:'#9333EA',items:[
+    {id:'i22',nm:'Кальция бутират',dose:'3 капс. (666 мг)',note:'питает кишечник ночью',st:'active'},
+    {id:'i23',nm:'Карликовая пальма',dose:'400 мг',note:'с жирной едой',st:'active'},
+    {id:'i24',nm:'Глицин',dose:'1 г',note:'для сна',st:'active'}
+  ]}
+];
+var DEF_PROTOS=[
+  {id:'p1',nm:'GHK-Cu + BPC-157 + KPV + TB-500',color:'#7C3AED',st:'active',
+   comps:[{nm:'GHK-Cu',mg:65},{nm:'BPC-157',mg:25},{nm:'KPV',mg:20},{nm:'TB-500',mg:15}],
+   bacMl:1,dosePerInjMg:3,days:[1,2,3,4,5,6,0],startDate:todayStr(),
+   remEn:false,remTime:'08:00',notes:'SC подкожно. 2-4°C.'}
+];
+var DEF_WISH=[
+  {id:'w1',nm:'Метилкобаламин B12',dose:'1000-2000 мкг',note:'MTRR гомозигота — критично!',pri:'high',st:'want'},
+  {id:'w2',nm:'Магний глицинат',dose:'300-400 мг',note:'MTHFR + KCNJ11 + сон',pri:'high',st:'want'},
+  {id:'w3',nm:'Витамин D3',dose:'2000-3000 МЕ',note:'VDR bb генотип',pri:'high',st:'want'},
+  {id:'w4',nm:'CoQ10 убихинол',dose:'100-150 мг',note:'SOD2 гетерозигота',pri:'med',st:'want'},
+  {id:'w5',nm:'Карнозин L',dose:'500-1000 мг',note:'Защита от гликирования (GLO1)',pri:'med',st:'want'},
+  {id:'w6',nm:'Бенфотиамин',dose:'150 мг',note:'Синергия с карнозином',pri:'med',st:'want'}
+];
+
+// STATE
+var secs=LS.get('secs3',DEF_SECS);
+var checks=LS.get('chk3',{});
+var protos=LS.get('protos3',DEF_PROTOS);
+var wish=LS.get('wish3',DEF_WISH);
+var cycleData=LS.get('cyc_v2',(function(){
+  var days=[];
+  var ranges=[['2025-12-25','2025-12-28'],['2026-02-06','2026-02-11'],['2026-03-15','2026-03-18'],['2026-04-11','2026-04-16']];
+  for(var ri=0;ri<ranges.length;ri++){
+    var s=new Date(ranges[ri][0]+'T00:00:00'),e=new Date(ranges[ri][1]+'T00:00:00');
+    for(var d=new Date(s);d<=e;d.setDate(d.getDate()+1))days.push(d.toISOString().slice(0,10));
+  }
+  return{periodDays:days};
+})());
+
+var DEF_LAB={tests:[
+  {id:'gspg',cat:'horm',name:'ГСПГ',unit:'нмоль/л',lo:18,hi:114,values:[{d:'2025-06-13',v:171.9},{d:'2025-08-05',v:140.6},{d:'2025-11-29',v:136}],recs:['Снизить сахар и рафинированные углеводы','Добавить цинк 25–30 мг и магний глицинат','Снизить уровень стресса (кортизол повышает ГСПГ)','Консультация: гинеколог-эндокринолог']},
+  {id:'androst',cat:'horm',name:'Андростендион',unit:'нг/мл',lo:0.3,hi:3.3,values:[{d:'2025-08-05',v:4.38}],recs:['Снизить сахар и ограничить молочные продукты','Рассмотреть DIM (дииндолилметан)','Мята колосковая — снижает андрогены','Консультация: гинеколог-эндокринолог']},
+  {id:'aldost',cat:'horm',name:'Альдостерон',unit:'пг/мл',lo:30,hi:355,values:[{d:'2025-08-05',v:505}],recs:['Ограничить натрий (соль)','Магний и калий из питания','Измерять артериальное давление','Консультация: эндокринолог']},
+  {id:'leptin',cat:'horm',name:'Лептин',unit:'нг/мл',lo:3.7,hi:11.1,values:[{d:'2025-11-29',v:2.6}],recs:['Достаточный калораж, особенно белок','Нормализовать сон: лептин синтезируется ночью','Снизить интенсивные тренировки временно','Консультация: эндокринолог']},
+  {id:'tsh',cat:'horm',name:'ТТГ',unit:'мкМЕ/мл',lo:0.27,hi:4.2,values:[{d:'2025-06-13',v:1.29},{d:'2025-11-29',v:1.34}]},
+  {id:'t4free',cat:'horm',name:'Т4 свободный',unit:'нг/дл',lo:0.8,hi:2.1,values:[{d:'2025-11-29',v:1.45}]},
+  {id:'lh',cat:'horm',name:'ЛГ',unit:'мМЕ/мл',lo:2.4,hi:12.6,values:[{d:'2025-06-13',v:7.6},{d:'2025-11-29',v:8.04}]},
+  {id:'fsh',cat:'horm',name:'ФСГ',unit:'мМЕ/мл',lo:3.5,hi:12.5,values:[{d:'2025-06-13',v:7.95},{d:'2025-11-29',v:6.96}]},
+  {id:'prl',cat:'horm',name:'Пролактин',unit:'нг/мл',lo:6,hi:29.9,values:[{d:'2025-11-29',v:25.5}]},
+  {id:'ttest',cat:'horm',name:'Тестостерон общий',unit:'нмоль/л',lo:0.45,hi:2.91,values:[{d:'2025-08-05',v:1.48}]},
+  {id:'deas',cat:'horm',name:'ДГЭА-С',unit:'мкмоль/л',lo:2.68,hi:9.23,values:[{d:'2025-06-13',v:3.52},{d:'2025-11-29',v:2.93}]},
+  {id:'prog',cat:'horm',name:'Прогестерон',unit:'нмоль/л',lo:16.4,hi:59.0,values:[{d:'2025-07-30',v:39.75}]},
+  {id:'cort',cat:'horm',name:'Кортизол',unit:'нмоль/л',lo:176,hi:629,values:[{d:'2025-08-05',v:486.3}]},
+  {id:'amh',cat:'horm',name:'АМГ',unit:'нг/мл',lo:1.0,hi:4.0,values:[{d:'2025-06-13',v:2.5}]},
+  {id:'actg',cat:'horm',name:'АКТГ',unit:'пмоль/л',lo:1.6,hi:13.9,values:[{d:'2025-06-13',v:2.49}]},
+  {id:'igf1',cat:'horm',name:'IGF-1',unit:'нг/мл',lo:112,hi:281,values:[{d:'2025-06-13',v:193.3}]},
+  {id:'plt',cat:'blood',name:'Тромбоциты',unit:'10⁹/л',lo:152,hi:372,values:[{d:'2025-06-25',v:316},{d:'2025-11-29',v:424}],recs:['Исключить обезвоживание и воспаление','Омега-3 2–4 г/сут (антиагрегантный эффект)','Контроль СРБ и ОАК через 4–6 недель','Консультация: терапевт/гематолог']},
+  {id:'ferr',cat:'blood',name:'Ферритин',unit:'нг/мл',lo:15,hi:150,values:[{d:'2025-06-13',v:36.9},{d:'2025-07-30',v:27.2},{d:'2025-11-29',v:151}],recs:['Резкий рост в ноябре — исключить воспаление','Сдать С-реактивный белок (СРБ)','Ферритин повышается при воспалении независимо от железа','Повторный контроль через 2 мес.']},
+  {id:'ngran',cat:'blood',name:'Незрелые гранулоциты',unit:'10⁹/л',lo:0,hi:0.09,values:[{d:'2025-11-29',v:0.10},{d:'2026-02-24',v:0.18}],recs:['Небольшое повышение — возможен вялотекущий воспалительный процесс','Сдать СРБ, посев при симптомах','Консультация: терапевт']},
+  {id:'hgb',cat:'blood',name:'Гемоглобин',unit:'г/л',lo:117,hi:155,values:[{d:'2025-05-30',v:160},{d:'2025-06-25',v:148},{d:'2025-11-29',v:138},{d:'2026-02-24',v:131}]},
+  {id:'mcv',cat:'blood',name:'MCV (объём эритроцитов)',unit:'фл',lo:82,hi:98,values:[{d:'2025-05-30',v:78.5},{d:'2025-06-25',v:84},{d:'2025-11-29',v:87.6}]},
+  {id:'leu',cat:'blood',name:'Лейкоциты',unit:'10⁹/л',lo:4.5,hi:11,values:[{d:'2025-11-29',v:6.79},{d:'2026-02-24',v:6.59}]},
+  {id:'soe',cat:'blood',name:'СОЭ',unit:'мм/ч',lo:2,hi:20,values:[{d:'2025-11-29',v:13},{d:'2026-02-24',v:5}]},
+  {id:'bild',cat:'bio',name:'Билирубин прямой',unit:'мкмоль/л',lo:0,hi:5.0,values:[{d:'2025-09-22',v:5.73}],recs:['Небольшое превышение — повторить строго натощак','Исключить желчнокаменную болезнь (УЗИ)','Ограничить жирное и жареное','Консультация: гастроэнтеролог']},
+  {id:'ldl',cat:'bio',name:'ЛПНП',unit:'ммоль/л',lo:0,hi:3.0,values:[{d:'2025-07-30',v:3.17}],recs:['Ограничить насыщенные жиры и трансжиры','Клетчатка: псиллиум, овсянка, бобовые','Омега-3 2–4 г/сут, берберин — рассмотреть','Повтор через 3 месяца']},
+  {id:'glu',cat:'bio',name:'Глюкоза',unit:'ммоль/л',lo:4.1,hi:5.9,values:[{d:'2025-07-30',v:5.11},{d:'2025-09-22',v:5.07}]},
+  {id:'homa',cat:'bio',name:'HOMA-IR',unit:'',lo:0,hi:2.7,values:[{d:'2025-07-30',v:2.1}]},
+  {id:'alt',cat:'bio',name:'АЛТ',unit:'Ед/л',lo:0,hi:35,values:[{d:'2025-07-30',v:22.7},{d:'2025-09-22',v:17.6}]},
+  {id:'ast',cat:'bio',name:'АСТ',unit:'Ед/л',lo:0,hi:35,values:[{d:'2025-07-30',v:20.7},{d:'2025-09-22',v:19.4}]},
+  {id:'chol',cat:'bio',name:'Холестерин общий',unit:'ммоль/л',lo:0,hi:5.2,values:[{d:'2025-07-30',v:4.94},{d:'2025-09-22',v:3.83}]},
+  {id:'hdl',cat:'bio',name:'ЛПВП',unit:'ммоль/л',lo:1.2,hi:3.0,values:[{d:'2025-07-30',v:1.39}]},
+  {id:'trig',cat:'bio',name:'Триглицериды',unit:'ммоль/л',lo:0,hi:1.7,values:[{d:'2025-07-30',v:0.84}]},
+  {id:'creat',cat:'bio',name:'Креатинин',unit:'мкмоль/л',lo:58,hi:96,values:[{d:'2025-07-30',v:87.3},{d:'2025-09-22',v:69.0}]},
+  {id:'prot',cat:'bio',name:'Белок общий',unit:'г/л',lo:64,hi:83,values:[{d:'2025-11-29',v:75.1},{d:'2025-09-22',v:77.8}]},
+  {id:'bilir',cat:'bio',name:'Билирубин общий',unit:'мкмоль/л',lo:3.5,hi:21,values:[{d:'2025-07-30',v:10.5},{d:'2025-09-22',v:12.1}]},
+  {id:'b12',cat:'vit',name:'Витамин B12',unit:'пмоль/л',lo:145,hi:569,values:[{d:'2025-06-13',v:590.5}],recs:['Небольшое превышение — обычно безопасно','При MTRR/MTHFR — метаболизм ускорен, норма выше','Убедиться что принимается метилкобаламин','Повтор через 3 мес.']},
+  {id:'uric',cat:'vit',name:'Мочевая кислота',unit:'мкмоль/л',lo:142.8,hi:339.2,values:[{d:'2026-02-24',v:129.2}],recs:['Мочевая кислота снижена','Достаточное потребление белка и пуринов','Проверить функцию почек (креатинин)','Повторный контроль через 3 мес.']},
+  {id:'vitd',cat:'vit',name:'Витамин D',unit:'нг/мл',lo:30,hi:100,values:[{d:'2025-06-13',v:49.7}]},
+  {id:'folat',cat:'vit',name:'Фолиевая кислота',unit:'нг/мл',lo:3.89,hi:26.8,values:[{d:'2025-06-13',v:14.98}]},
+  {id:'homocys',cat:'vit',name:'Гомоцистеин',unit:'мкмоль/л',lo:0,hi:12,values:[{d:'2025-06-13',v:5.66}]},
+  {id:'copper',cat:'vit',name:'Медь',unit:'мкмоль/л',lo:12.6,hi:24.4,values:[{d:'2025-08-05',v:17.4}]},
+  {id:'chlam_igg',cat:'inf',name:'Хламидия IgG',unit:'',qual:true,values:[{d:'2026-02-24',v:'Положит.',pos:true}],recs:['IgG — следы перенесённой инфекции','ПЦР от 10.03.26 — отрицательный (активной нет)','Динамическое наблюдение, повтор IgG через 6 мес.']},
+  {id:'chlam_iga',cat:'inf',name:'Хламидия IgA',unit:'',qual:true,values:[{d:'2026-02-24',v:'Положит.',pos:true}],recs:['IgA+ при ПЦР— могут указывать на недавнюю инфекцию','ПЦР от 10.03.26 — отрицательный','Консультация гинеколога при симптомах']},
+  {id:'ureap',cat:'inf',name:'Уреаплазма IgG',unit:'',qual:true,values:[{d:'2026-02-24',v:'Положит.',pos:true}],recs:['Возможно бессимптомное носительство','Рекомендуется ПЦР-диагностика для уточнения','Консультация: гинеколог']},
+  {id:'chlam_pcr',cat:'inf',name:'Хламидия ПЦР',unit:'',qual:true,values:[{d:'2026-03-10',v:'Отриц.',pos:false}]},
+  {id:'myco_pcr',cat:'inf',name:'Микоплазма ПЦР',unit:'',qual:true,values:[{d:'2026-03-10',v:'Отриц.',pos:false}]},
+  {id:'helico',cat:'inf',name:'H. pylori (дых. тест)',unit:'',qual:true,values:[{d:'2025-05-30',v:'Отриц.',pos:false}]}
+]};
+var labData=LS.get('lab_v1',null)||JSON.parse(JSON.stringify(DEF_LAB));
+var labCat='all';
+var labExpanded=null;
+var labCharts={};
+var tab='sups';
+var stab='today';
+var openSec=null;
+var modType=null;
+var modData={};
+var expandedProto={};
+var DAYS=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+var calVY=new Date().getFullYear();
+var calVM=new Date().getMonth();
+
+function saveAll(){LS.set('secs3',secs);LS.set('chk3',checks);LS.set('protos3',protos);LS.set('wish3',wish);}
+
+// RENDER HEADER
+function renderHdr(){
+  var d=new Date();
+  var months=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  el('hday').textContent=DAYS[d.getDay()];
+  el('hdate').textContent=d.getDate()+' '+months[d.getMonth()];
+  el('htitle').textContent=tab==='sups'?'💊 Добавки':tab==='pep'?'🧬 Пептиды':tab==='cycle'?'🌸 Цикл':tab==='lab'?'🔬 Анализы':'🛒 Купить';
+  var defs=tab==='sups'?[['today','✅ Сегодня'],['manage','⚙️ Список'],['stats','📊 Итоги']]:
+           tab==='pep'?[['active','✅ Активные'],['paused','⏸️ Пауза'],['finished','🏁 История'],['manage','⚙️']]:
+           tab==='cycle'?[]:tab==='lab'?[]:
+           [['today','🛒 Список'],['bought','✅ Куплено']];
+  var h='';
+  for(var i=0;i<defs.length;i++){
+    h+='<button class="tab'+(stab===defs[i][0]?' on':'')+'" onclick="setStab(\''+defs[i][0]+'\')">'+defs[i][1]+'</button>';
+  }
+  el('stabs').innerHTML=h;
+  el('bnav').innerHTML=
+    '<button class="bnav-btn" onclick="setTab(\'sups\')"><span class="bnav-ic">💊</span><span class="bnav-lb'+(tab==='sups'?' on':'')+'">Добавки</span>'+(tab==='sups'?'<div class="bnav-dot"></div>':'')+'</button>'+
+    '<button class="bnav-btn" onclick="setTab(\'pep\')"><span class="bnav-ic">🧬</span><span class="bnav-lb'+(tab==='pep'?' on':'')+'">Пептиды</span>'+(tab==='pep'?'<div class="bnav-dot"></div>':'')+'</button>'+
+    '<button class="bnav-btn" onclick="setTab(\'cycle\')"><span class="bnav-ic">🌸</span><span class="bnav-lb'+(tab==='cycle'?' on':'')+'">Цикл</span>'+(tab==='cycle'?'<div class="bnav-dot"></div>':'')+'</button>'+
+    '<button class="bnav-btn" onclick="setTab(\'lab\')"><span class="bnav-ic">🔬</span><span class="bnav-lb'+(tab==='lab'?' on':'')+'">Анализы</span>'+(tab==='lab'?'<div class="bnav-dot"></div>':'')+'</button>'+
+    '<button class="bnav-btn" onclick="setTab(\'wish\')"><span class="bnav-ic">🛒</span><span class="bnav-lb'+(tab==='wish'?' on':'')+'">Купить</span>'+(tab==='wish'?'<div class="bnav-dot"></div>':'')+'</button>';
+  el('fab').style.display=(tab!=='cycle'&&tab!=='lab'&&(stab==='today'||stab==='manage'))?'flex':'none';
+}
+
+// SUPPLEMENTS
+function renderSups(){
+  var h='';
+  var tod=todayStr();
+  if(stab==='today'){
+    var allAct=[];
+    for(var si=0;si<secs.length;si++){for(var ii=0;ii<secs[si].items.length;ii++){if(secs[si].items[ii].st==='active')allAct.push(secs[si].items[ii]);}}
+    var done=0;for(var di=0;di<allAct.length;di++){if(checks[tod+'_'+allAct[di].id])done++;}
+    var pct=allAct.length?Math.round(done/allAct.length*100):0;
+    h+='<div class="prow"><span>Прогресс дня</span><b>'+done+'/'+allAct.length+' &middot; '+pct+'%</b></div>';
+    h+='<div class="bar"><div class="fill" style="width:'+pct+'%"></div></div>';
+    for(var s=0;s<secs.length;s++){
+      var sec=secs[s];
+      var act=[];for(var a=0;a<sec.items.length;a++){if(sec.items[a].st==='active')act.push(sec.items[a]);}
+      if(!act.length)continue;
+      var sdone=0;for(var sd=0;sd<act.length;sd++){if(checks[tod+'_'+act[sd].id])sdone++;}
+      var isOpen=(openSec===sec.id);
+      h+='<div class="sec">';
+      h+='<button class="sec-hdr'+(isOpen?' open':'')+'" style="background:'+sec.ac+'15;border:1.5px solid '+sec.ac+'30" onclick="toggleSec(\''+sec.id+'\')">';
+      h+='<div><div class="sec-t">'+esc(sec.t)+'</div><div class="sec-s" style="color:'+sec.ac+'">'+esc(sec.sub)+'</div></div>';
+      h+='<div style="display:flex;align-items:center;gap:8px"><b style="font-size:12px;color:'+(sdone===act.length?'#059669':sec.ac)+'">'+sdone+'/'+act.length+'</b>'
+        +'<span style="color:'+sec.ac+';display:inline-block;transition:.25s;transform:'+(isOpen?'rotate(180deg)':'none')+'">&#9660;</span></div>';
+      h+='</button>';
+      if(isOpen){
+        h+='<div class="sec-body" style="border:1.5px solid '+sec.ac+'30">';
+        for(var i=0;i<act.length;i++){
+          var it=act[i];
+          var dn=!!checks[tod+'_'+it.id];
+          h+='<div class="item" style="background:'+(dn?sec.ac+'12':i%2===1?'#FAFAFA':'#fff')+'">';
+          h+='<div class="chk'+(dn?' on':'')+'" style="'+(dn?'background:'+sec.ac+';border-color:'+sec.ac:'')+'" onclick="toggleItem(\''+it.id+'\')">'+(dn?'&#10003;':'')+'</div>';
+          h+='<div style="flex:1;min-width:0" onclick="toggleItem(\''+it.id+'\')">';
+          h+='<div style="display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap">';
+          h+='<span class="iname'+(dn?' done':'')+'">'+esc(it.nm)+'</span>';
+          h+='<span class="idose" style="color:'+sec.ac+';background:'+sec.ac+'18">'+esc(it.dose)+'</span>';
+          h+='</div>';
+          if(it.note)h+='<div class="inote'+(it.warn?' iwarn':'')+'">'+esc(it.note)+'</div>';
+          h+='</div>';
+          h+='<button class="iedit" onclick="openEditItem(\''+sec.id+'\',\''+it.id+'\')">✏️</button>';
+          h+='</div>';
+        }
+        h+='</div>';
+      }
+      h+='</div>';
+    }
+
+  } else if(stab==='manage'){
+    h+='<button class="btn-add" onclick="openAdd()"><span style="font-size:18px">+</span> Добавить добавку</button>';
+    for(var ms=0;ms<secs.length;ms++){
+      var msec=secs[ms];
+      h+='<div style="font-size:13px;font-weight:700;color:'+msec.ac+';margin:12px 0 6px 4px">'+esc(msec.t)+'</div>';
+      for(var mi=0;mi<msec.items.length;mi++){
+        var mit=msec.items[mi];
+        h+='<div class="mi">';
+        h+='<div style="flex:1"><div class="mi-n">'+esc(mit.nm)+'</div><div class="mi-d">'+esc(mit.dose)+(mit.st==='paused'?' · ⏸️ пауза':mit.st==='todo'?' · ⭐ добавить':'')+'</div></div>';
+        h+='<button class="iedit" onclick="openEditItem(\''+msec.id+'\',\''+mit.id+'\')">✏️</button>';
+        h+='</div>';
+      }
+    }
+  } else {
+    var aa2=[];for(var ss2=0;ss2<secs.length;ss2++){for(var ii2=0;ii2<secs[ss2].items.length;ii2++){if(secs[ss2].items[ii2].st==='active')aa2.push(secs[ss2].items[ii2]);}}
+    var dn2=0;for(var dd2=0;dd2<aa2.length;dd2++){if(checks[tod+'_'+aa2[dd2].id])dn2++;}
+    var p2=aa2.length?Math.round(dn2/aa2.length*100):0;
+    h+='<div class="pct-box"><div class="pct-n" style="color:'+(p2===100?'#059669':'#BE185D')+'">'+p2+'%</div><div style="font-size:14px;color:#6B7280;margin-top:6px">'+dn2+' из '+aa2.length+' принято'+(p2===100?' 🎉':'')+'</div></div>';
+    for(var st2=0;st2<secs.length;st2++){
+      var stSec=secs[st2];
+      var stA=[];for(var sta=0;sta<stSec.items.length;sta++){if(stSec.items[sta].st==='active')stA.push(stSec.items[sta]);}
+      if(!stA.length)continue;
+      var stD=0;for(var std=0;std<stA.length;std++){if(checks[tod+'_'+stA[std].id])stD++;}
+      var stP=stA.length?Math.round(stD/stA.length*100):0;
+      h+='<div class="stat-c"><div class="stat-r"><span>'+esc(stSec.t)+'</span><b style="color:'+(stP===100?'#059669':stSec.ac)+'">'+stD+'/'+stA.length+'</b></div>';
+      h+='<div class="stat-b"><div class="stat-f" style="width:'+stP+'%;background:'+(stP===100?'#059669':stSec.ac)+'"></div></div></div>';
+    }
+    h+='<button onclick="resetToday()" style="width:100%;padding:12px;border-radius:12px;border:1px solid #FEE2E2;background:#FEF2F2;color:#DC2626;cursor:pointer;font-size:13px;margin-top:8px">🔄 Сбросить отметки</button>';
+  }
+  el('con').innerHTML=h;
+}
+
+// PEPTIDES
+function calcUnits(p){
+  var totalMg=0;
+  for(var i=0;i<p.comps.length;i++)totalMg+=(parseFloat(p.comps[i].mg)||0);
+  var bac=parseFloat(p.bacMl)||1;
+  var dose=parseFloat(p.dosePerInjMg)||0;
+  var conc=totalMg/bac;
+  var vol=conc>0?dose/conc:0;
+  var units=vol*100;
+  var totalI=dose>0?Math.floor(totalMg/dose):0;
+  var daysLeft=null;
+  if(p.startDate&&p.days&&p.days.length){
+    var injPerWeek=p.days.length;
+    var weeksLeft=Math.floor(totalI/injPerWeek);
+    var d=new Date(p.startDate+'T00:00:00');
+    d.setDate(d.getDate()+weeksLeft*7);
+    daysLeft=Math.max(0,Math.floor((d-new Date())/(1000*60*60*24)));
+  }
+  return{units:units.toFixed(1),totalI:totalI,daysLeft:daysLeft,conc:(totalMg/bac).toFixed(2),vol:vol.toFixed(3)};
+}
+function renderPep(){
+  var h='';
+  var tod=new Date().getDay();
+  if(stab!=='manage'){
+    var filtered=protos.filter(function(p){return p.st===stab;});
+    if(!filtered.length){h='<div style="text-align:center;padding:40px 0;color:#9CA3AF;font-size:14px">'+
+      (stab==='active'?'Нет активных протоколов':stab==='paused'?'Нет протоколов на паузе':'История пуста')+
+      '</div>';}
+    for(var pi=0;pi<filtered.length;pi++){
+      var p=filtered[pi];
+      var c=calcUnits(p);
+      var isToday=p.days&&p.days.indexOf(tod)>=0&&p.st==='active';
+      var isExp=!!expandedProto[p.id];
+      h+='<div class="card">';
+      if(isToday&&p.remEn){h+='<div style="background:'+p.color+';border-radius:9px;padding:7px 12px;margin-bottom:10px;color:#fff;font-size:13px;font-weight:700">💉 Сегодня день укола!</div>';}
+      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">';
+      h+='<div><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><div style="width:9px;height:9px;border-radius:50%;background:'+p.color+'"></div><span style="font-size:15px;font-weight:700;color:#1F2937">'+esc(p.nm)+'</span></div>';
+      if(isToday&&!p.remEn)h+='<span style="font-size:11px;background:#059669;color:#fff;padding:2px 8px;border-radius:8px">💉 Укол сегодня</span>';
+      if(p.st==='paused')h+='<span style="font-size:11px;background:#FEF3C7;color:#D97706;padding:2px 8px;border-radius:8px">⏸️ Пауза</span>';
+      h+='</div></div>';
+      h+='<div class="proto-grid">';
+      h+='<div class="proto-cell"><div class="proto-cl">💉 Шприц</div><div class="proto-cv" style="color:'+p.color+'">'+c.units+' ед.</div></div>';
+      h+='<div class="proto-cell"><div class="proto-cl">📅 Дней</div><div class="proto-cv" style="color:'+p.color+'">'+(c.daysLeft!=null?c.daysLeft+' дн.':'—')+'</div></div>';
+      h+='<div class="proto-cell"><div class="proto-cl">💊 Уколов</div><div class="proto-cv" style="color:'+p.color+'">'+c.totalI+'</div></div>';
+      h+='</div>';
+      h+='<div class="days-row">';
+      for(var di=0;di<7;di++){
+        var wd=[1,2,3,4,5,6,0][di];
+        var on=p.days&&p.days.indexOf(wd)>=0;
+        var isT=wd===tod;
+        h+='<div class="day-chip" style="background:'+(on?(isT?p.color:p.color+'25'):'#f3f4f6')+';color:'+(on?(isT?'#fff':p.color):'#9CA3AF')+';border-color:'+(isT?p.color:'transparent')+';font-weight:'+(on?700:400)+'">'+DAYS[wd]+'</div>';
+      }
+      h+='</div>';
+      if(p.startDate)h+='<div style="font-size:12px;color:#9CA3AF;margin-bottom:8px">С '+esc(p.startDate)+'</div>';
+      h+='<button class="iedit" style="width:100%;padding:7px;font-size:12px;background:#FFF5F9;border:1px solid #FBCFE8;border-radius:9px;cursor:pointer;color:#6B7280" onclick="toggleProtoExp(\''+p.id+'\')">'+( isExp?'▲ Скрыть':'▼ Подробности')+'</button>';
+      if(isExp){
+        if(p.comps&&p.comps.length){
+          h+='<div style="margin-top:10px"><div style="font-size:12px;font-weight:700;color:#9CA3AF;margin-bottom:6px">Состав 1 укола:</div>';
+          for(var ci=0;ci<p.comps.length;ci++){
+            var ratio=(parseFloat(p.comps[ci].mg)||0)/(parseFloat(p.comps[ci].mg)||1);
+            var allMg=0;for(var cm=0;cm<p.comps.length;cm++)allMg+=(parseFloat(p.comps[cm].mg)||0);
+            var compDose=allMg>0?((parseFloat(p.comps[ci].mg)||0)/allMg*(parseFloat(p.dosePerInjMg)||0)*1000).toFixed(0):0;
+            h+='<div style="display:flex;justify-content:space-between;padding:6px 10px;background:#FFF5F9;border:1px solid #FBCFE8;border-radius:9px;margin-bottom:4px">';
+            h+='<span style="font-size:13px;color:#1F2937">'+esc(p.comps[ci].nm)+'</span>';
+            h+='<span style="font-size:12px;font-weight:700;color:'+p.color+'">'+compDose+' мкг</span>';
+            h+='</div>';
+          }
+          h+='</div>';
+        }
+        if(p.notes)h+='<div style="font-size:12px;color:#6B7280;font-style:italic;padding:8px;background:#FFF5F9;border-radius:9px;margin-top:6px">'+esc(p.notes)+'</div>';
+        h+='<div style="display:flex;gap:8px;margin-top:10px">';
+        h+='<button onclick="openEditProto(\''+p.id+'\')" style="flex:1;padding:9px;border-radius:10px;border:1px solid #FBCFE8;background:#FFF5F9;color:#6B7280;cursor:pointer;font-size:12px">✏️ Изменить</button>';
+        h+='</div>';
+      }
+      h+='</div>';
+    }
+  } else {
+    h+='<button class="btn-add" onclick="openAdd()"><span style="font-size:18px">+</span> Новый протокол</button>';
+    for(var pm=0;pm<protos.length;pm++){
+      var pp=protos[pm];
+      h+='<div class="mi"><div style="flex:1"><div class="mi-n">'+esc(pp.nm)+'</div><div class="mi-d">'+(pp.st==='active'?'✅ Активен':pp.st==='paused'?'⏸️ Пауза':'🏁 Завершён')+'</div></div>';
+      h+='<button class="iedit" onclick="openEditProto(\''+pp.id+'\')">✏️</button></div>';
+    }
+  }
+  el('con').innerHTML=h;
+}
+
+// WISHLIST
+function renderWish(){
+  var h='';
+  var wantL=[];var boughtL=[];
+  for(var i=0;i<wish.length;i++){if(wish[i].st==='want')wantL.push(wish[i]);else boughtL.push(wish[i]);}
+  var showList=stab==='today'?wantL:boughtL;
+  h+='<div class="wish-stats"><div class="wish-stat"><div class="wish-n" style="color:#BE185D">'+wantL.length+'</div><div class="wish-l">Хочу купить</div></div>';
+  h+='<div class="wish-stat"><div class="wish-n" style="color:#059669">'+boughtL.length+'</div><div class="wish-l">Куплено</div></div></div>';
+  h+='<button class="btn-add" onclick="openAdd()"><span style="font-size:18px">+</span> Добавить в список</button>';
+  if(!showList.length){h+='<div style="text-align:center;padding:30px;color:#9CA3AF;font-size:14px">Список пуст</div>';}
+  for(var wi=0;wi<showList.length;wi++){
+    var w=showList[wi];
+    h+='<div class="wish-card">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">';
+    h+='<div class="wish-nm'+(w.st==='bought'?' done':'')+'">'+esc(w.nm)+'</div>';
+    h+='<button class="iedit" onclick="openEditWish(\''+w.id+'\')">✏️</button>';
+    h+='</div>';
+    h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:'+(w.note?'6':'0')+'px">';
+    if(w.dose)h+='<span style="font-size:12px;color:#EC4899;background:#FCE7F3;padding:2px 8px;border-radius:8px;font-weight:600">'+esc(w.dose)+'</span>';
+    if(w.pri==='high')h+='<span style="font-size:10px;background:#FEE2E2;color:#DC2626;padding:2px 7px;border-radius:7px;font-weight:600">🔴 Важно</span>';
+    else if(w.pri==='med')h+='<span style="font-size:10px;background:#FEF3C7;color:#D97706;padding:2px 7px;border-radius:7px;font-weight:600">🟡 Средне</span>';
+    h+='</div>';
+    if(w.note)h+='<div style="font-size:12px;color:#9CA3AF;font-style:italic;padding:6px 8px;background:#FFF5F9;border-radius:8px;margin-bottom:8px">'+esc(w.note)+'</div>';
+    if(w.st==='want')h+='<button class="wish-buy" onclick="markBought(\''+w.id+'\')">✅ Куплено</button>';
+    else h+='<div style="font-size:11px;color:#9CA3AF;text-align:right">Куплено ✓</div>';
+    h+='</div>';
+  }
+  el('con').innerHTML=h;
+}
+
+// MAIN RENDER
+function render(){
+  renderHdr();
+  if(tab==='sups')renderSups();
+  else if(tab==='pep')renderPep();
+  else if(tab==='cycle')renderCycle();
+  else if(tab==='lab')renderLab();
+  else renderWish();
+}
+
+// ACTIONS
+function setTab(t){tab=t;stab=(t==='pep'?'active':'today');openSec=null;if(t==='cycle'){calVY=new Date().getFullYear();calVM=new Date().getMonth();}if(t==='lab'){labCat='all';if(labExpanded){Object.keys(labCharts).forEach(function(k){if(labCharts[k]){labCharts[k].destroy();delete labCharts[k];}});labExpanded=null;}}render();}
+function setStab(s){stab=s;render();}
+function toggleSec(id){openSec=(openSec===id?null:id);renderSups();}
+function toggleItem(id){
+  var k=todayStr()+'_'+id;
+  checks[k]=!checks[k];
+  LS.set('chk3',checks);
+  renderSups();
+}
+function toggleProtoExp(id){expandedProto[id]=!expandedProto[id];renderPep();}
+function resetToday(){
+  var d=todayStr();var nc={};
+  for(var k in checks){if(k.indexOf(d)!==0)nc[k]=checks[k];}
+  checks=nc;LS.set('chk3',checks);renderSups();
+}
+function markBought(id){
+  var w=null;for(var i=0;i<wish.length;i++){if(wish[i].id===id){w=wish[i];break;}}
+  if(!w)return;
+  modType='move';modData={id:id,wish:w};
+  el('mod-title').textContent='Куплено! Что дальше?';
+  var h='<div style="text-align:center;margin-bottom:16px">';
+  h+='<div style="font-size:17px;font-weight:700;color:#1F2937;margin-bottom:4px">'+esc(w.nm)+'</div>';
+  h+='<div style="font-size:13px;color:#9CA3AF">'+esc(w.dose||'')+'</div></div>';
+  h+='<div style="display:flex;flex-direction:column;gap:10px">';
+  h+='<button onclick="moveToSups()" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;cursor:pointer;font-size:14px;font-weight:700">💊 Добавить в протокол добавок</button>';
+  h+='<button onclick="moveToPep()" style="width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#7C3AED,#EC4899);color:#fff;cursor:pointer;font-size:14px;font-weight:700">🧬 Добавить в пептиды</button>';
+  h+='<button onclick="moveJustMark()" style="width:100%;padding:12px;border-radius:12px;border:1px solid #D1FAE5;background:#F0FDF4;color:#059669;cursor:pointer;font-size:14px;font-weight:600">✅ Просто отметить как куплено</button>';
+  h+='<button onclick="closeMod()" style="width:100%;padding:11px;border-radius:12px;border:1px solid #FBCFE8;background:#FFF5F9;color:#9CA3AF;cursor:pointer;font-size:14px">Отмена</button>';
+  h+='</div>';
+  el('mod-body').innerHTML=h;
+  el('modal').classList.add('show');
+}
+function doBought(id){for(var i=0;i<wish.length;i++){if(wish[i].id===id){wish[i].st='bought';wish[i].boughtDate=todayStr();break;}}LS.set('wish3',wish);}
+function moveJustMark(){doBought(modData.id);closeMod();renderWish();}
+function moveToSups(){
+  var w=modData.wish;doBought(modData.id);closeMod();
+  tab='sups';stab='manage';openSec=null;
+  openSupForm(secs[0].id,null);
+  // pre-fill name and dose
+  setTimeout(function(){
+    var fn=el('f-nm');var fd=el('f-dose');
+    if(fn)fn.value=w.nm||'';
+    if(fd)fd.value=w.dose||'';
+  },50);
+}
+function moveToPep(){
+  var w=modData.wish;doBought(modData.id);closeMod();
+  tab='pep';stab='manage';
+  openProtoForm(null);
+  setTimeout(function(){var fn=el('f-nm');if(fn)fn.value=w.nm||'';},50);
+}
+
+// OPEN ADD
+function openAdd(){
+  if(tab==='sups'){openSupForm(null,null);}
+  else if(tab==='pep'){openProtoForm(null);}
+  else if(tab==='cycle'){return;}
+  else if(tab==='lab'){openLabAdd();}
+  else{openWishForm(null);}
+}
+
+// SUP FORM
+function openEditItem(secId,itemId){
+  var sec=null;var item=null;
+  for(var i=0;i<secs.length;i++){if(secs[i].id===secId){sec=secs[i];for(var j=0;j<sec.items.length;j++){if(sec.items[j].id===itemId){item=sec.items[j];break;}}break;}}
+  openSupForm(secId,item);
+}
+function openSupForm(secId,item){
+  modType='sup';modData={secId:secId,item:item};
+  el('mod-title').textContent=item?'Редактировать':'Новая добавка';
+  var secOpts='';for(var i=0;i<secs.length;i++){secOpts+='<option value="'+secs[i].id+'"'+(secId===secs[i].id?' selected':'')+'>'+secs[i].t+'</option>';}
+  var h='<div class="fg"><label class="fl">Название</label><input class="fi" id="f-nm" value="'+esc(item?item.nm:'')+'" placeholder="Название добавки"/></div>';
+  h+='<div class="fg"><label class="fl">Дозировка</label><input class="fi" id="f-dose" value="'+esc(item?item.dose:'')+'" placeholder="500 мг"/></div>';
+  h+='<div class="fg"><label class="fl">Заметка</label><input class="fi" id="f-note" value="'+esc(item?item.note||'':'')+'" placeholder="Особенности приёма"/></div>';
+  h+='<div class="fg"><label class="fl">⚠️ Важное предупреждение</label><div class="fpills"><button type="button" class="fpill'+(item&&item.warn?' on':'')+'" id="f-warn" onclick="toggleFpill(\'f-warn\')">Да, важно</button></div></div>';
+  h+='<div class="fg"><label class="fl">Время приёма</label><select class="fi" id="f-sec">'+secOpts+'</select></div>';
+  h+='<div class="fg"><label class="fl">Статус</label><div class="fpills">';
+  h+='<button type="button" class="fpill'+(!item||item.st==='active'?' on':'')+'" id="fp-active" onclick="setFStatus(\'active\')">✅ Принимаю</button>';
+  h+='<button type="button" class="fpill'+(item&&item.st==='todo'?' on':'')+'" id="fp-todo" onclick="setFStatus(\'todo\')">⭐ Добавить</button>';
+  h+='<button type="button" class="fpill'+(item&&item.st==='paused'?' on':'')+'" id="fp-paused" onclick="setFStatus(\'paused\')">⏸️ Пауза</button>';
+  h+='</div></div>';
+  h+='<div style="display:flex;gap:8px;margin-top:16px"><button class="btn-sec" style="flex:1" onclick="closeMod()">Отмена</button><button class="btn-pri" style="flex:2" onclick="saveSup()">Сохранить</button></div>';
+  if(item)h+='<button class="btn-del" onclick="deleteSup()">🗑️ Удалить</button>';
+  el('mod-body').innerHTML=h;
+  el('modal').classList.add('show');
+}
+var fStatus='active';
+function setFStatus(s){
+  fStatus=s;
+  var all=['active','todo','paused'];
+  for(var i=0;i<all.length;i++){
+    var b=el('fp-'+all[i]);if(b)b.className='fpill'+(s===all[i]?' on':'');
+  }
+}
+function toggleFpill(id){var b=el(id);if(b)b.className=b.className.indexOf(' on')>=0?'fpill':'fpill on';}
+function saveSup(){
+  var nm=(el('f-nm')||{}).value||'';
+  var dose=(el('f-dose')||{}).value||'';
+  var note=(el('f-note')||{}).value||'';
+  var warn=((el('f-warn')||{}).className||'').indexOf(' on')>=0?1:0;
+  var sid=(el('f-sec')||{}).value||secs[0].id;
+  var st=fStatus||'active';
+  if(!nm)return;
+  var m=modData;
+  if(m.item){
+    // edit
+    var removed=false;
+    for(var i=0;i<secs.length;i++){
+      for(var j=secs[i].items.length-1;j>=0;j--){
+        if(secs[i].items[j].id===m.item.id){secs[i].items.splice(j,1);removed=true;break;}
+      }
+      if(removed)break;
+    }
+    for(var k=0;k<secs.length;k++){
+      if(secs[k].id===sid){secs[k].items.push({id:m.item.id,nm:nm,dose:dose,note:note,warn:warn,st:st});break;}
+    }
+  } else {
+    for(var s=0;s<secs.length;s++){
+      if(secs[s].id===sid){secs[s].items.push({id:uid(),nm:nm,dose:dose,note:note,warn:warn,st:st});break;}
+    }
+  }
+  LS.set('secs3',secs);closeMod();render();
+}
+function deleteSup(){
+  var m=modData;
+  if(!m.item)return;
+  for(var i=0;i<secs.length;i++){
+    for(var j=secs[i].items.length-1;j>=0;j--){
+      if(secs[i].items[j].id===m.item.id){secs[i].items.splice(j,1);break;}
+    }
+  }
+  LS.set('secs3',secs);closeMod();render();
+}
+
+// PROTO FORM
+var protoDays=[1,2,3,4,5,6,0];
+var protoComps=[{nm:'',mg:''}];
+function openProtoForm(id){
+  var p=null;for(var i=0;i<protos.length;i++){if(protos[i].id===id){p=protos[i];break;}}
+  modType='proto';modData={id:id,proto:p};
+  protoDays=p?(p.days||[]).slice():[1,2,3,4,5,6,0];
+  protoComps=p&&p.comps?JSON.parse(JSON.stringify(p.comps)):[{nm:'',mg:''}];
+  renderProtoForm(p);
+  el('modal').classList.add('show');
+}
+function renderProtoForm(p){
+  el('mod-title').textContent=p?'Редактировать':'Новый протокол';
+  var h='<div class="fg"><label class="fl">Название</label><input class="fi" id="f-nm" value="'+esc(p?p.nm:'')+'" placeholder="GHK-Cu + BPC-157 + ..."/></div>';
+  h+='<div class="fg"><label class="fl">Цвет</label><div style="display:flex;gap:8px;flex-wrap:wrap" id="colorpicker">';
+  var cols=['#EC4899','#7C3AED','#2563EB','#0D9488','#059669','#D97706','#DC2626','#9333EA'];
+  var selC=p?p.color:cols[0];
+  for(var i=0;i<cols.length;i++){h+='<div style="width:26px;height:26px;border-radius:50%;background:'+cols[i]+';cursor:pointer;border:'+(cols[i]===selC?'3px solid #1F2937':'3px solid transparent')+'" onclick="selectColor(\''+cols[i]+'\')"></div>';}
+  h+='</div></div>';
+  h+='<div class="fg"><label class="fl">Компоненты <button type="button" onclick="addComp()" style="border:none;background:#FCE7F3;color:#BE185D;border-radius:6px;padding:2px 8px;cursor:pointer;font-size:11px;font-weight:700;margin-left:8px">+ Добавить</button></label>';
+  h+='<div id="comps-list">';
+  for(var ci=0;ci<protoComps.length;ci++){
+    h+='<div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">';
+    h+='<input class="fi" style="flex:2" placeholder="Пептид" value="'+esc(protoComps[ci].nm)+'" oninput="updComp('+ci+',\'nm\',this.value)"/>';
+    h+='<input class="fi" style="flex:1" type="number" placeholder="мг" value="'+esc(protoComps[ci].mg)+'" oninput="updComp('+ci+',\'mg\',this.value)"/>';
+    if(protoComps.length>1)h+='<button style="background:#FEE2E2;border:none;color:#DC2626;border-radius:8px;width:34px;height:38px;cursor:pointer;font-size:16px" onclick="delComp('+ci+')">✕</button>';
+    h+='</div>';
+  }
+  h+='</div></div>';
+  h+='<div class="fg"><label class="fl">BAC вода (мл)</label><input class="fi" type="number" id="f-bac" value="'+esc(p?p.bacMl:1)+'" oninput="updateUnitsPreview()"/></div>';
+  h+='<div class="fg"><label class="fl">Доза за укол (мг)</label><input class="fi" type="number" id="f-dose" value="'+esc(p?p.dosePerInjMg:'')+'" placeholder="3" oninput="updateUnitsPreview()"/>';
+  h+='<div id="units-preview" style="margin-top:8px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:9px;padding:8px 12px;display:flex;justify-content:space-between"><span style="font-size:12px;color:#6B7280">💉 Делений U-100:</span><span id="units-val" style="font-size:20px;font-weight:700;color:#7C3AED">—</span></div></div>';
+  h+='<div class="fg"><label class="fl">Дни введения</label><div class="days-row" id="dayspicker">';
+  for(var di=0;di<7;di++){
+    var wd2=[1,2,3,4,5,6,0][di];
+    var on=protoDays.indexOf(wd2)>=0;
+    h+='<button type="button" style="flex:1;padding:7px 0;border-radius:8px;border:1.5px solid '+(on?'#EC4899':'#FBCFE8')+';background:'+(on?'#FCE7F3':'#FFF5F9')+';color:'+(on?'#BE185D':'#9CA3AF')+';cursor:pointer;font-size:11px;font-weight:'+(on?700:400)+'" onclick="toggleDay('+wd2+')">'+DAYS[wd2]+'</button>';
+  }
+  h+='</div><div style="font-size:12px;color:#9CA3AF;margin-top:4px" id="days-count">'+protoDays.length+' дней в неделю</div></div>';
+  h+='<div class="fg"><label class="fl">Дата начала</label><input class="fi" type="date" id="f-start" value="'+esc(p?p.startDate:todayStr())+'"/></div>';
+  h+='<div class="fg"><label class="fl">Статус</label><div class="fpills">';
+  h+='<button type="button" class="fpill'+(!p||p.st==='active'?' on':'')+'" id="pp-active" onclick="setProtoSt(\'active\')">✅ Активен</button>';
+  h+='<button type="button" class="fpill'+(p&&p.st==='paused'?' on':'')+'" id="pp-paused" onclick="setProtoSt(\'paused\')">⏸️ Пауза</button>';
+  h+='<button type="button" class="fpill'+(p&&p.st==='finished'?' on':'')+'" id="pp-finished" onclick="setProtoSt(\'finished\')">🏁 Завершён</button>';
+  h+='</div></div>';
+  h+='<div class="fg"><label class="fl">Напоминание</label><div class="fpills"><button type="button" class="fpill'+(p&&p.remEn?' on':'')+'" id="f-remen" onclick="toggleFpill(\'f-remen\')">🔔 Включить</button></div></div>';
+  h+='<div class="fg"><label class="fl">Заметки</label><textarea class="fi" id="f-notes">'+esc(p?p.notes||'':'')+'</textarea></div>';
+  h+='<div style="display:flex;gap:8px;margin-top:16px"><button class="btn-sec" style="flex:1" onclick="closeMod()">Отмена</button><button class="btn-pri" style="flex:2" onclick="saveProto()">Сохранить</button></div>';
+  if(p)h+='<button class="btn-del" onclick="deleteProto()">🗑️ Удалить протокол</button>';
+  el('mod-body').innerHTML=h;
+}
+var selectedColor='#7C3AED';
+var protoStatus='active';
+function selectColor(c){
+  selectedColor=c;
+  var dots=el('colorpicker').querySelectorAll('div');
+  for(var i=0;i<dots.length;i++){dots[i].style.border=dots[i].style.background===c?'3px solid #1F2937':'3px solid transparent';}
+}
+function setProtoSt(s){
+  protoStatus=s;
+  var all=['active','paused','finished'];
+  for(var i=0;i<all.length;i++){var b=el('pp-'+all[i]);if(b)b.className='fpill'+(s===all[i]?' on':'');}
+}
+function addComp(){protoComps.push({nm:'',mg:''});reRenderComps();}
+function delComp(i){protoComps.splice(i,1);reRenderComps();}
+function updComp(i,k,v){if(protoComps[i])protoComps[i][k]=v;updateUnitsPreview();}
+function reRenderComps(){
+  var h='';
+  for(var ci=0;ci<protoComps.length;ci++){
+    h+='<div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">';
+    h+='<input class="fi" style="flex:2" placeholder="Пептид" value="'+esc(protoComps[ci].nm)+'" oninput="updComp('+ci+',\'nm\',this.value)"/>';
+    h+='<input class="fi" style="flex:1" type="number" placeholder="мг" value="'+esc(protoComps[ci].mg)+'" oninput="updComp('+ci+',\'mg\',this.value)"/>';
+    if(protoComps.length>1)h+='<button style="background:#FEE2E2;border:none;color:#DC2626;border-radius:8px;width:34px;height:38px;cursor:pointer;font-size:16px" onclick="delComp('+ci+')">✕</button>';
+    h+='</div>';
+  }
+  el('comps-list').innerHTML=h;
+}
+function updateUnitsPreview(){
+  var totalMg=0;for(var i=0;i<protoComps.length;i++)totalMg+=(parseFloat(protoComps[i].mg)||0);
+  var bac=parseFloat((el('f-bac')||{}).value)||1;
+  var dose=parseFloat((el('f-dose')||{}).value)||0;
+  var v=el('units-val');if(v){v.textContent=totalMg&&dose&&bac?(dose/(totalMg/bac)*100).toFixed(1)+' ед.':'—';}
+}
+function toggleDay(d){
+  var idx=protoDays.indexOf(d);
+  if(idx>=0)protoDays.splice(idx,1);else protoDays.push(d);
+  var btns=el('dayspicker').querySelectorAll('button');
+  var order=[1,2,3,4,5,6,0];
+  for(var i=0;i<btns.length;i++){
+    var on=protoDays.indexOf(order[i])>=0;
+    btns[i].style.borderColor=on?'#EC4899':'#FBCFE8';
+    btns[i].style.background=on?'#FCE7F3':'#FFF5F9';
+    btns[i].style.color=on?'#BE185D':'#9CA3AF';
+    btns[i].style.fontWeight=on?700:400;
+  }
+  var dc=el('days-count');if(dc)dc.textContent=protoDays.length+' дней в неделю';
+}
+function saveProto(){
+  var nm=(el('f-nm')||{}).value||'';if(!nm)return;
+  var p={
+    id:modData.id||uid(),nm:nm,
+    color:selectedColor||'#7C3AED',
+    st:protoStatus||'active',
+    comps:protoComps.map(function(c){return{nm:c.nm,mg:parseFloat(c.mg)||0};}),
+    bacMl:parseFloat((el('f-bac')||{}).value)||1,
+    dosePerInjMg:parseFloat((el('f-dose')||{}).value)||0,
+    days:protoDays.slice(),
+    startDate:(el('f-start')||{}).value||todayStr(),
+    remEn:((el('f-remen')||{}).className||'').indexOf(' on')>=0,
+    remTime:'08:00',
+    notes:(el('f-notes')||{}).value||''
+  };
+  if(modData.id){for(var i=0;i<protos.length;i++){if(protos[i].id===modData.id){protos[i]=p;break;}}}
+  else protos.push(p);
+  LS.set('protos3',protos);closeMod();render();
+}
+function deleteProto(){
+  if(!modData.id)return;
+  for(var i=protos.length-1;i>=0;i--){if(protos[i].id===modData.id){protos.splice(i,1);break;}}
+  LS.set('protos3',protos);closeMod();render();
+}
+function openEditProto(id){openProtoForm(id);}
+
+// WISH FORM
+function openEditWish(id){
+  var w=null;for(var i=0;i<wish.length;i++){if(wish[i].id===id){w=wish[i];break;}}
+  openWishForm(w);
+}
+function openWishForm(w){
+  modType='wish';modData={id:w?w.id:null,wish:w};
+  el('mod-title').textContent=w?'Редактировать':'Добавить в список';
+  var h='<div class="fg"><label class="fl">Название</label><input class="fi" id="f-nm" value="'+esc(w?w.nm:'')+'" placeholder="Что хочу купить?"/></div>';
+  h+='<div class="fg"><label class="fl">Дозировка</label><input class="fi" id="f-dose" value="'+esc(w?w.dose||'':'')+'" placeholder="500 мг"/></div>';
+  h+='<div class="fg"><label class="fl">Приоритет</label><div class="fpills">';
+  h+='<button type="button" class="fpill'+((!w||w.pri==='high')?' on':'')+'" id="wp-high" onclick="setWPri(\'high\')">🔴 Важно</button>';
+  h+='<button type="button" class="fpill'+(w&&w.pri==='med'?' on':'')+'" id="wp-med" onclick="setWPri(\'med\')">🟡 Средне</button>';
+  h+='<button type="button" class="fpill'+(w&&w.pri==='low'?' on':'')+'" id="wp-low" onclick="setWPri(\'low\')">🟢 Потом</button>';
+  h+='</div></div>';
+  h+='<div class="fg"><label class="fl">Заметка</label><textarea class="fi" id="f-note">'+esc(w?w.note||'':'')+'</textarea></div>';
+  h+='<div style="display:flex;gap:8px;margin-top:16px"><button class="btn-sec" style="flex:1" onclick="closeMod()">Отмена</button><button class="btn-pri" style="flex:2" onclick="saveWish()">Сохранить</button></div>';
+  if(w)h+='<button class="btn-del" onclick="deleteWish()">🗑️ Удалить</button>';
+  el('mod-body').innerHTML=h;
+  el('modal').classList.add('show');
+}
+var wPri='high';
+function setWPri(p){
+  wPri=p;
+  var all=['high','med','low'];
+  for(var i=0;i<all.length;i++){var b=el('wp-'+all[i]);if(b)b.className='fpill'+(p===all[i]?' on':'');}
+}
+function saveWish(){
+  var nm=(el('f-nm')||{}).value||'';if(!nm)return;
+  var item={id:modData.id||uid(),nm:nm,dose:(el('f-dose')||{}).value||'',note:(el('f-note')||{}).value||'',pri:wPri||'high',st:'want'};
+  if(modData.id){for(var i=0;i<wish.length;i++){if(wish[i].id===modData.id){wish[i]=item;break;}}}
+  else wish.push(item);
+  LS.set('wish3',wish);closeMod();render();
+}
+function deleteWish(){
+  if(!modData.id)return;
+  for(var i=wish.length-1;i>=0;i--){if(wish[i].id===modData.id){wish.splice(i,1);break;}}
+  LS.set('wish3',wish);closeMod();render();
+}
+
+// CYCLE TAB
+var CYC_PHASES=[
+  {nm:'Менструация',emoji:'🩸',color:'#C94B6B',bg:'#FCE7F3',tc:'#BE185D',
+   desc:'Тело обновляется. Время бережного отношения к себе.',
+   sport:['Лёгкая йога и стретчинг','Спокойные прогулки на воздухе','Без интенсивных нагрузок'],
+   food:['Продукты с железом: шпинат, бобовые','Тёмный шоколад и имбирный чай','Тёплые блюда и больше воды'],
+   life:['Больше отдыха и сна','Грелка или ванна с солью','Медитации и дыхательные практики']},
+  {nm:'Фолликулярная',emoji:'🌱',color:'#3E9B62',bg:'#D1FAE5',tc:'#065F46',
+   desc:'Энергия растёт. Лучшее время для новых начинаний.',
+   sport:['Силовые тренировки — отличный момент!','Кардио: бег, велосипед, плавание','Пробуй новые виды активности'],
+   food:['Нежирный белок: рыба, курица, яйца','Ферментированные продукты','Свежие овощи и фрукты'],
+   life:['Начинай новые проекты','Планируй сложные задачи','Активная социальная жизнь']},
+  {nm:'Овуляция',emoji:'✨',color:'#D08530',bg:'#FEF3C7',tc:'#92400E',
+   desc:'Пиковая энергия и уверенность. Ты в лучшей форме!',
+   sport:['HIIT и интервальные тренировки','Групповые занятия и командный спорт','Пиковая производительность'],
+   food:['Клетчатка и антиоксиданты','Ягоды, брокколи, листовые салаты','Меньше тяжёлой еды'],
+   life:['Важные переговоры и презентации','Публичные выступления','Расширяй социальные связи']},
+  {nm:'Лютеиновая',emoji:'🌙',color:'#7B6BB5',bg:'#EDE9FE',tc:'#4C1D95',
+   desc:'Тело готовится к отдыху. Время завершать и восстанавливаться.',
+   sport:['Пилатес, йога и плавание','Умеренное кардио','Снижай интенсивность к концу'],
+   food:['Сложные углеводы: овсянка, батат','Магний: орехи, семена, авокадо','Тёмный шоколад для настроения'],
+   life:['Завершай начатые проекты','Больше времени для себя','Приоритизируй сон и отдых']}
+];
+
+function getCycleGroups(){
+  var sorted=cycleData.periodDays.slice().sort();
+  var groups=[];var cur=null;
+  for(var i=0;i<sorted.length;i++){
+    var d=sorted[i];
+    if(!cur){cur={start:d,end:d};}
+    else{
+      var prev=new Date(cur.end+'T00:00:00'),curr=new Date(d+'T00:00:00');
+      var diff=Math.round((curr-prev)/86400000);
+      if(diff===1){cur.end=d;}
+      else if(diff>1){groups.push(cur);cur={start:d,end:d};}
+    }
+  }
+  if(cur)groups.push(cur);
+  return groups;
+}
+function getAvgLen(){
+  var groups=getCycleGroups();
+  if(groups.length<2)return 28;
+  var diffs=[];
+  for(var i=1;i<groups.length;i++){
+    var d=Math.round((new Date(groups[i].start)-new Date(groups[i-1].start))/86400000);
+    if(d>15&&d<60)diffs.push(d);
+  }
+  if(!diffs.length)return 28;
+  return Math.round(diffs.reduce(function(a,b){return a+b;},0)/diffs.length);
+}
+function getCyclePhase(){
+  var groups=getCycleGroups();
+  if(!groups.length)return null;
+  var last=groups[groups.length-1];
+  var avgLen=getAvgLen();
+  var start=new Date(last.start+'T00:00:00');
+  var now=new Date();now.setHours(0,0,0,0);
+  var diff=Math.floor((now-start)/86400000);
+  if(diff<0)return null;
+  var pLen=Math.min(10,Math.max(2,Math.round((new Date(last.end)-new Date(last.start))/86400000)+1));
+  var cycleDay=(diff%avgLen)+1;
+  var cn=Math.floor(diff/avgLen)+1;
+  var fEnd=Math.round(avgLen*0.464);
+  var oEnd=fEnd+3;
+  var idx=cycleDay<=pLen?0:cycleDay<=fEnd?1:cycleDay<=oEnd?2:3;
+  return{idx:idx,day:cycleDay,total:avgLen,pLen:pLen,cn:cn,daysLeft:avgLen-cycleDay};
+}
+function toggleCalDay(dateStr){
+  var idx=cycleData.periodDays.indexOf(dateStr);
+  if(idx>=0){cycleData.periodDays.splice(idx,1);}
+  else{cycleData.periodDays.push(dateStr);}
+  LS.set('cyc_v2',cycleData);renderCycle();
+}
+function toggleTodayPeriod(){
+  toggleCalDay(todayStr());
+  calVY=new Date().getFullYear();calVM=new Date().getMonth();
+}
+function prevCalMonth(){if(calVM===0){calVM=11;calVY--;}else{calVM--;}renderCycle();}
+function nextCalMonth(){if(calVM===11){calVM=0;calVY++;}else{calVM++;}renderCycle();}
+
+function getPeriodDaysInMonth(yr,mo){
+  var days=new Set();
+  for(var i=0;i<cycleData.periodDays.length;i++){
+    var d=new Date(cycleData.periodDays[i]+'T00:00:00');
+    if(d.getFullYear()===yr&&d.getMonth()===mo)days.add(d.getDate());
+  }
+  return days;
+}
+
+function renderCycleCalendar(){
+  var MO=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+  var firstDay=new Date(calVY,calVM,1);
+  var lastDay=new Date(calVY,calVM+1,0);
+  var startDow=(firstDay.getDay()+6)%7;
+  var periodDays=getPeriodDaysInMonth(calVY,calVM);
+  var today=new Date();
+  var tDay=today.getDate(),tMo=today.getMonth(),tYr=today.getFullYear();
+  var isThisMo=(tYr===calVY&&tMo===calVM);
+  var dows=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  var h='<div class="cal-card">';
+  h+='<div class="cal-nav">';
+  h+='<button class="cal-nav-btn" onclick="prevCalMonth()">‹</button>';
+  h+='<span class="cal-month">'+MO[calVM]+' '+calVY+'</span>';
+  h+='<button class="cal-nav-btn" onclick="nextCalMonth()">›</button>';
+  h+='</div>';
+  h+='<div style="font-size:11px;color:#9CA3AF;text-align:center;margin-bottom:8px">Нажми на любой день, чтобы отметить или снять менструацию</div>';
+  h+='<div class="cal-grid">';
+  for(var i=0;i<7;i++)h+='<div class="cal-dow">'+dows[i]+'</div>';
+  for(var e=0;e<startDow;e++)h+='<div></div>';
+  for(var d=1;d<=lastDay.getDate();d++){
+    var ip=periodDays.has(d);
+    var it=isThisMo&&d===tDay;
+    var dateStr=calVY+'-'+String(calVM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var cls='cal-day'+(ip?' period':'')+(it?' cy-today':'');
+    h+='<div class="'+cls+'" onclick="toggleCalDay(\''+dateStr+'\')" style="cursor:pointer">'+d+'</div>';
+  }
+  h+='</div></div>';
+  return h;
+}
+
+function renderCycle(){
+  var phase=getCyclePhase();
+  var today=todayStr();
+  var todayIsperiod=cycleData.periodDays.indexOf(today)>=0;
+  var h='';
+
+  // Phase wheel + info
+  h+='<div class="ph-card">';
+  h+='<div class="ph-canvas-wrap"><canvas id="cycWheel" width="140" height="140" style="width:140px;height:140px"></canvas></div>';
+  h+='<div class="ph-info">';
+  if(phase){
+    var p=CYC_PHASES[phase.idx];
+    h+='<div class="ph-pill" style="background:'+p.bg+';color:'+p.tc+'">'+p.emoji+' '+p.nm+'</div>';
+    h+='<div class="ph-name">'+esc(p.desc)+'</div>';
+    h+='<div class="ph-count">День '+phase.day+' из '+phase.total+' &nbsp;·&nbsp; цикл #'+phase.cn+'</div>';
+    if(phase.daysLeft>0)h+='<div class="ph-count" style="margin-top:2px">До менструации — ~'+phase.daysLeft+' '+(phase.daysLeft===1?'день':phase.daysLeft<5?'дня':'дней')+'</div>';
+    h+='<div class="ph-count" style="margin-top:4px;color:#9CA3AF">Средняя длина цикла: '+getAvgLen()+' дн.</div>';
+  }else{
+    h+='<div class="ph-name" style="font-size:14px;color:#6B7280">Отметь дни цикла в календаре — я рассчитаю фазу 🌸</div>';
+  }
+  h+='</div></div>';
+
+  // Recommendations
+  if(phase){
+    var pp=CYC_PHASES[phase.idx];
+    h+='<div class="cyc-rec">';
+    var cats=[{k:'sport',l:'🏃 Спорт'},{k:'food',l:'🥗 Питание'},{k:'life',l:'🌿 Образ жизни'}];
+    for(var ci=0;ci<cats.length;ci++){
+      var cat=cats[ci];
+      h+='<div class="cr-card"><div class="cr-head" style="color:'+pp.color+'">'+cat.l+'</div>';
+      for(var ri=0;ri<pp[cat.k].length;ri++){h+='<div class="cr-li">'+esc(pp[cat.k][ri])+'</div>';}
+      h+='</div>';
+    }
+    h+='</div>';
+  }
+
+  // Calendar
+  h+=renderCycleCalendar();
+
+  // Quick toggle for today
+  h+='<div class="tg-card">';
+  h+='<div class="tg-row">';
+  h+='<div class="tg-left"><div class="tg-label">🩸 Сегодня — день менструации</div><div class="tg-sub">'+(todayIsperiod?'Отмечено — нажми чтобы снять':'Нажми чтобы отметить сегодня')+'</div></div>';
+  h+='<div class="tg-sw'+(todayIsperiod?' on':'')+'" onclick="toggleTodayPeriod()"><div class="tg-knob"></div></div>';
+  h+='</div>';
+  h+='</div>';
+
+  el('con').innerHTML=h;
+  drawCycleWheel(phase);
+}
+
+function drawCycleWheel(phase){
+  var canvas=el('cycWheel');
+  if(!canvas)return;
+  var dpr=window.devicePixelRatio||1;
+  var size=140;
+  canvas.width=size*dpr;
+  canvas.height=size*dpr;
+  canvas.style.width=size+'px';
+  canvas.style.height=size+'px';
+  var ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  var cx=70,cy=70,R=62,r2=44,gap=0.04;
+  var avgLen=phase?phase.total:28;
+  var pLen=phase?phase.pLen:5;
+  var fEnd=Math.round(avgLen*0.464);
+  var oEnd=fEnd+3;
+  var phaseDays=[pLen,fEnd-pLen,3,avgLen-oEnd];
+  var colors=['#C94B6B','#3E9B62','#D08530','#7B6BB5'];
+  var inactive='#F3E8EE';
+  var sa=-Math.PI/2;
+  for(var i=0;i<4;i++){
+    var angle=(phaseDays[i]/avgLen)*Math.PI*2;
+    var ea=sa+angle-gap;
+    ctx.beginPath();
+    ctx.arc(cx,cy,R,sa+gap/2,ea);
+    ctx.arc(cx,cy,r2,ea,sa+gap/2,true);
+    ctx.closePath();
+    ctx.fillStyle=phase&&phase.idx===i?colors[i]:inactive;
+    ctx.fill();
+    if(phase&&phase.idx!==i){
+      ctx.beginPath();
+      ctx.arc(cx,cy,R,sa+gap/2,ea);
+      ctx.arc(cx,cy,r2,ea,sa+gap/2,true);
+      ctx.closePath();
+      ctx.fillStyle=colors[i]+'38';
+      ctx.fill();
+    }
+    sa+=angle;
+  }
+  if(phase){
+    var dotA=-Math.PI/2+(phase.day/phase.total)*Math.PI*2;
+    var mr=(R+r2)/2;
+    var dx=cx+mr*Math.cos(dotA),dy=cy+mr*Math.sin(dotA);
+    ctx.beginPath();ctx.arc(dx,dy,5,0,Math.PI*2);
+    ctx.fillStyle='#fff';ctx.fill();
+    ctx.strokeStyle=colors[phase.idx];ctx.lineWidth=2.5;ctx.stroke();
+    ctx.fillStyle='#1F2937';
+    ctx.font='700 16px system-ui,sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('День '+phase.day,cx,cy-5);
+    ctx.font='11px system-ui,sans-serif';
+    ctx.fillStyle='#9CA3AF';
+    ctx.fillText('из '+phase.total,cx,cy+11);
+  }else{
+    ctx.fillStyle='#9CA3AF';
+    ctx.font='11px system-ui,sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('нет данных',cx,cy);
+  }
+}
+
+// LAB RESULTS TAB
+var LAB_CATS=[{id:'all',l:'Все'},{id:'horm',l:'🧬 Гормоны'},{id:'blood',l:'🩸 Кровь'},{id:'bio',l:'🔬 Биохимия'},{id:'vit',l:'☀️ Витамины'},{id:'inf',l:'🦠 Инфекции'}];
+var LAB_GROUPS=[{id:'horm',l:'🧬 Гормоны'},{id:'blood',l:'🩸 Кровь'},{id:'bio',l:'🔬 Биохимия'},{id:'vit',l:'☀️ Витамины'},{id:'inf',l:'🦠 Инфекции'}];
+
+function labStatus(t){
+  if(!t.values||!t.values.length)return'none';
+  if(t.qual){return t.values[t.values.length-1].pos?'hi':'ok';}
+  var lv=t.values[t.values.length-1].v;
+  if(typeof lv!=='number')return'ok';
+  if(lv>t.hi)return'hi';
+  if(t.lo>0&&lv<t.lo)return'lo';
+  return'ok';
+}
+function countLabWarns(){
+  var n=0,tests=labData.tests;
+  for(var i=0;i<tests.length;i++){var s=labStatus(tests[i]);if(s==='hi'||s==='lo')n++;}
+  return n;
+}
+function getLabSorted(cat){
+  var tests=labData.tests.filter(function(t){return t.cat===cat&&t.values&&t.values.length;});
+  return tests.sort(function(a,b){
+    var sa=labStatus(a),sb=labStatus(b);
+    var wa=(sa==='hi'||sa==='lo')?0:1;
+    var wb=(sb==='hi'||sb==='lo')?0:1;
+    return wa-wb;
+  });
+}
+function setLabCat(c){
+  labCat=c;
+  if(labExpanded){Object.keys(labCharts).forEach(function(k){if(labCharts[k]){labCharts[k].destroy();delete labCharts[k];}});labExpanded=null;}
+  renderLab();
+}
+function toggleLabCard(id){
+  Object.keys(labCharts).forEach(function(k){if(labCharts[k]){labCharts[k].destroy();delete labCharts[k];}});
+  labExpanded=labExpanded===id?null:id;
+  renderLab();
+  if(labExpanded){
+    var t=labData.tests.find(function(x){return x.id===labExpanded;});
+    if(t&&t.values.length>1&&!t.qual)setTimeout(function(){drawLabChart(t);},100);
+  }
+}
+function drawLabChart(t){
+  if(typeof Chart==='undefined')return;
+  var canvas=el('lch-'+t.id);if(!canvas)return;
+  if(labCharts[t.id])labCharts[t.id].destroy();
+  var vals=t.values.map(function(m){return m.v;});
+  var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);
+  var pad=Math.max((mx-mn)*0.2,mx*0.05,1);
+  labCharts[t.id]=new Chart(canvas,{
+    type:'line',
+    data:{
+      labels:t.values.map(function(m){return m.d.slice(5).replace('-','.');}),
+      datasets:[{data:vals,borderColor:'#EC4899',backgroundColor:'rgba(236,72,153,0.07)',borderWidth:2,pointRadius:4,tension:0.3,fill:true,
+        pointBackgroundColor:vals.map(function(v){return v>t.hi?'#DC2626':(t.lo>0&&v<t.lo?'#2563EB':'#EC4899');})}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{
+        y:{min:mn-pad,max:mx+pad,grid:{color:'rgba(251,207,232,0.35)'},ticks:{font:{size:9},color:'#9CA3AF',maxTicksLimit:4}},
+        x:{grid:{display:false},ticks:{font:{size:9},color:'#9CA3AF'}}
+      }
+    }
+  });
+}
+function renderLabCard(t){
+  var st=labStatus(t);var lm=t.values[t.values.length-1];
+  var isExp=labExpanded===t.id;var isWarn=st==='hi'||st==='lo';
+  var valStr=t.qual?lm.v:(lm.v+' '+t.unit);
+  var pct=50;
+  if(!t.qual&&typeof lm.v==='number'&&t.hi){pct=Math.min(100,Math.max(0,((lm.v-(t.lo||0))/(t.hi-(t.lo||0)))*100));}
+  var barC=st==='ok'?'#059669':'#DC2626';
+  var inner='<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+    +'<div><div style="font-size:13px;font-weight:500;color:'+(isWarn?'#DC2626':'#1F2937')+'">'+esc(t.name)+'</div>'
+    +(t.refN?'<div style="font-size:10px;color:#9CA3AF;font-style:italic">'+esc(t.refN)+'</div>':'')
+    +'<div style="font-size:10px;color:#9CA3AF">'+lm.d.slice(5).replace('-','.')+'</div></div>'
+    +'<div style="text-align:right"><div style="font-size:14px;font-weight:500;color:'+(st==='hi'?'#DC2626':st==='lo'?'#2563EB':'#1F2937')+'">'+esc(valStr)+'</div>'
+    +(t.qual?'':'<div style="font-size:10px;color:#9CA3AF">норма: '+(t.lo>0?t.lo+'–':'')+t.hi+(t.unit?' '+t.unit:'')+'</div>')
+    +'</div></div>';
+  if(!t.qual)inner+='<div style="height:3px;background:#E5E7EB;border-radius:2px;margin-top:7px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+barC+';border-radius:2px"></div></div>';
+  inner+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">';
+  if(st==='hi')inner+='<span class="lbadge lb-warn">⚠ Выше нормы</span>';
+  else if(st==='lo')inner+='<span class="lbadge lb-low">⚠ Ниже нормы</span>';
+  else inner+='<span class="lbadge lb-ok">✓ Норма</span>';
+  if(t.values.length>1)inner+='<span class="lbadge lb-trend">📈 '+t.values.length+' изм.</span>';
+  inner+='</div>';
+  if(isExp){
+    inner+='<div class="lab-exp">';
+    inner+='<div style="font-size:10px;color:#9CA3AF;font-weight:500;margin-bottom:5px">ИСТОРИЯ</div>';
+    var rv=t.values.slice().reverse();
+    for(var ri=0;ri<rv.length;ri++){
+      var m=rv[ri];
+      var ms=t.qual?(m.pos?'hi':'ok'):(typeof m.v==='number'?(m.v>t.hi?'hi':(t.lo>0&&m.v<t.lo?'lo':'ok')):'ok');
+      var mw=ms!=='ok';
+      inner+='<div class="lab-hist" style="background:'+(mw?'#FEE2E2':'#F9FAFB')+'">'
+        +'<span style="color:#6B7280">'+m.d.replace('2026-','').replace('2025-','')+'</span>'
+        +'<span style="font-weight:500;color:'+(mw?'#DC2626':'#1F2937')+'">'+esc(String(m.v))+' '+esc(t.unit||'')+'</span></div>';
+    }
+    if(t.values.length>1&&!t.qual)inner+='<div class="lab-chart"><canvas id="lch-'+t.id+'" role="img" aria-label="График '+esc(t.name)+'"></canvas></div>';
+    if(t.recs&&t.recs.length){
+      inner+='<div class="lab-rec"><div class="lab-rec-t">Что делать</div>';
+      for(var rci=0;rci<t.recs.length;rci++)inner+='<div class="lab-rec-r">'+esc(t.recs[rci])+'</div>';
+      inner+='</div>';
+    }
+    inner+='</div>';
+  }
+  return'<div class="lcard'+(isWarn?' lw':'')+(isExp?' lx':'')+'" onclick="toggleLabCard(\''+t.id+'\')">'+inner+'</div>';
+}
+function renderLab(){
+  var wc=countLabWarns();
+  var h='<div style="display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:12px;margin-bottom:2px">';
+  for(var ci=0;ci<LAB_CATS.length;ci++){
+    var c=LAB_CATS[ci];var on=labCat===c.id;
+    h+='<button onclick="setLabCat(\''+c.id+'\')" style="white-space:nowrap;padding:5px 11px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid '+(on?'#EC4899':'#FBCFE8')+';background:'+(on?'#EC4899':'#FFF5F9')+';color:'+(on?'#fff':'#9CA3AF')+'">'+c.l+'</button>';
+  }
+  h+='</div>';
+  if(wc>0)h+='<div class="lab-warn-sum">⚠ '+wc+' показател'+(wc===1?'ь':wc<5?'я':'ей')+' вне нормы</div>';
+  if(labCat==='all'){
+    for(var gi=0;gi<LAB_GROUPS.length;gi++){
+      var g=LAB_GROUPS[gi];var gt=getLabSorted(g.id);
+      if(!gt.length)continue;
+      h+='<div class="lab-sec">'+g.l+'</div>';
+      for(var ti=0;ti<gt.length;ti++)h+=renderLabCard(gt[ti]);
+    }
+  }else{
+    var tests=getLabSorted(labCat);
+    if(!tests.length)h+='<div style="text-align:center;padding:30px;color:#9CA3AF;font-size:14px">Нет данных в этой категории</div>';
+    for(var i2=0;i2<tests.length;i2++)h+=renderLabCard(tests[i2]);
+  }
+  h+='<button class="btn-add" onclick="openLabAdd()"><span style="font-size:18px">+</span> Добавить результат</button>';
+  el('con').innerHTML=h;
+  if(labExpanded){
+    var et=labData.tests.find(function(x){return x.id===labExpanded;});
+    if(et&&et.values.length>1&&!et.qual)setTimeout(function(){drawLabChart(et);},100);
+  }
+}
+var labAddQual=0;
+function openLabAdd(){
+  modType='lab';modData={};labAddQual=0;
+  el('mod-title').textContent='Добавить результат';
+  var catHtml='';
+  for(var i=0;i<LAB_CATS.length;i++){if(LAB_CATS[i].id==='all')continue;catHtml+='<option value="'+LAB_CATS[i].id+'">'+LAB_CATS[i].l+'</option>';}
+  var h='<div class="fg"><label class="fl">Категория</label><select class="fi" id="la-cat" onchange="labCatChange()">'+catHtml+'</select></div>';
+  h+='<div class="fg"><label class="fl">Показатель</label><select class="fi" id="la-test" onchange="labTestChange()"></select></div>';
+  h+='<div class="fg"><label class="fl">Дата</label><input class="fi" type="date" id="la-date" value="'+todayStr()+'"/></div>';
+  h+='<div class="fg" id="la-num-fg"><label class="fl" id="la-unit-lbl">Значение</label><input class="fi" type="number" step="any" id="la-val" placeholder="Введи число"/></div>';
+  h+='<div class="fg" style="display:none" id="la-qual-fg"><label class="fl">Результат</label><div class="fpills"><button type="button" class="fpill on" id="la-neg" onclick="labSetQual(0)">Отрицательный</button><button type="button" class="fpill" id="la-pos" onclick="labSetQual(1)">Положительный</button></div></div>';
+  h+='<div style="display:flex;gap:8px;margin-top:16px"><button class="btn-sec" style="flex:1" onclick="closeMod()">Отмена</button><button class="btn-pri" style="flex:2" onclick="saveLabResult()">Сохранить</button></div>';
+  el('mod-body').innerHTML=h;
+  el('modal').classList.add('show');
+  labCatChange();
+}
+function labSetQual(v){
+  labAddQual=v;
+  var n=el('la-neg'),p=el('la-pos');
+  if(n)n.className='fpill'+(v===0?' on':'');
+  if(p)p.className='fpill'+(v===1?' on':'');
+}
+function labCatChange(){
+  var cat=(el('la-cat')||{}).value||'horm';
+  var tests=labData.tests.filter(function(t){return t.cat===cat;});
+  var sel=el('la-test');if(!sel)return;
+  sel.innerHTML=tests.map(function(t){return'<option value="'+t.id+'">'+t.name+'</option>';}).join('');
+  labTestChange();
+}
+function labTestChange(){
+  var tid=(el('la-test')||{}).value;
+  var t=labData.tests.find(function(x){return x.id===tid;});
+  var nfg=el('la-num-fg'),qfg=el('la-qual-fg');
+  if(!t)return;
+  if(t.qual){if(nfg)nfg.style.display='none';if(qfg)qfg.style.display='';}
+  else{if(nfg)nfg.style.display='';if(qfg)qfg.style.display='none';
+    var ul=el('la-unit-lbl');if(ul)ul.textContent='Значение'+(t.unit?' ('+t.unit+')':'');}
+}
+function saveLabResult(){
+  var tid=(el('la-test')||{}).value;var d=(el('la-date')||{}).value;
+  if(!tid||!d)return;
+  var t=labData.tests.find(function(x){return x.id===tid;});if(!t)return;
+  var entry={d:d};
+  if(t.qual){entry.v=labAddQual?'Положит.':'Отриц.';entry.pos=!!labAddQual;}
+  else{var vv=parseFloat((el('la-val')||{}).value);if(isNaN(vv))return;entry.v=vv;}
+  t.values.push(entry);
+  t.values.sort(function(a,b){return a.d>b.d?1:-1;});
+  LS.set('lab_v1',labData);
+  closeMod();
+  Object.keys(labCharts).forEach(function(k){if(labCharts[k]){labCharts[k].destroy();delete labCharts[k];}});
+  labExpanded=null;
+  renderLab();
+}
+
+// MODAL
+function closeMod(){el('modal').classList.remove('show');}
+
+// INIT
+render();
+</script>
+</body>
+</html>
