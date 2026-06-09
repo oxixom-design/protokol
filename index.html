@@ -1108,6 +1108,7 @@ function drawCycleWheel(phase){
 }
 
 // LAB RESULTS TAB
+function fmtDate(d){if(!d)return'';var p=d.split('-');if(p.length!==3)return d;return p[2]+'.'+p[1]+'.'+p[0].slice(2);}
 var LAB_CATS=[{id:'all',l:'Все'},{id:'horm',l:'🧬 Гормоны'},{id:'blood',l:'🩸 Кровь'},{id:'bio',l:'🔬 Биохимия'},{id:'vit',l:'☀️ Витамины'},{id:'inf',l:'🦠 Инфекции'}];
 var LAB_GROUPS=[{id:'horm',l:'🧬 Гормоны'},{id:'blood',l:'🩸 Кровь'},{id:'bio',l:'🔬 Биохимия'},{id:'vit',l:'☀️ Витамины'},{id:'inf',l:'🦠 Инфекции'}];
 
@@ -1158,7 +1159,7 @@ function drawLabChart(t){
   labCharts[t.id]=new Chart(canvas,{
     type:'line',
     data:{
-      labels:t.values.map(function(m){return m.d.slice(5).replace('-','.');}),
+      labels:t.values.map(function(m){return fmtDate(m.d);}),
       datasets:[{data:vals,borderColor:'#EC4899',backgroundColor:'rgba(236,72,153,0.07)',borderWidth:2,pointRadius:4,tension:0.3,fill:true,
         pointBackgroundColor:vals.map(function(v){return v>t.hi?'#DC2626':(t.lo>0&&v<t.lo?'#2563EB':'#EC4899');})}]
     },
@@ -1180,7 +1181,7 @@ function renderLabCard(t){
   var inner='<div style="display:flex;justify-content:space-between;align-items:flex-start">'
     +'<div><div style="font-size:13px;font-weight:500;color:'+(isWarn?'#DC2626':'#1F2937')+'">'+esc(t.name)+'</div>'
     +(t.refN?'<div style="font-size:10px;color:#9CA3AF;font-style:italic">'+esc(t.refN)+'</div>':'')
-    +'<div style="font-size:10px;color:#9CA3AF">'+lm.d.slice(5).replace('-','.')+'</div></div>'
+    +'<div style="font-size:10px;color:#9CA3AF">'+fmtDate(lm.d)+'</div></div>'
     +'<div style="text-align:right"><div style="font-size:14px;font-weight:500;color:'+(st==='hi'?'#DC2626':st==='lo'?'#2563EB':'#1F2937')+'">'+esc(valStr)+'</div>'
     +(t.qual?'':'<div style="font-size:10px;color:#9CA3AF">норма: '+(t.lo>0?t.lo+'–':'')+t.hi+(t.unit?' '+t.unit:'')+'</div>')
     +'</div></div>';
@@ -1200,7 +1201,7 @@ function renderLabCard(t){
       var ms=t.qual?(m.pos?'hi':'ok'):(typeof m.v==='number'?(m.v>t.hi?'hi':(t.lo>0&&m.v<t.lo?'lo':'ok')):'ok');
       var mw=ms!=='ok';
       inner+='<div class="lab-hist" style="background:'+(mw?'#FEE2E2':'#F9FAFB')+'">'
-        +'<span style="color:#6B7280">'+m.d.replace('2026-','').replace('2025-','')+'</span>'
+        +'<span style="color:#6B7280">'+fmtDate(m.d)+'</span>'
         +'<span style="font-weight:500;color:'+(mw?'#DC2626':'#1F2937')+'">'+esc(String(m.v))+' '+esc(t.unit||'')+'</span></div>';
     }
     if(t.values.length>1&&!t.qual)inner+='<div class="lab-chart"><canvas id="lch-'+t.id+'" role="img" aria-label="График '+esc(t.name)+'"></canvas></div>';
