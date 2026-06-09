@@ -21,7 +21,8 @@ body{background:#FDF2F8;font-family:system-ui,sans-serif;-webkit-font-smoothing:
 .tabs{display:flex;gap:4px;background:#FFF5F9;border-radius:12px;padding:4px;margin-bottom:10px}
 .tab{flex:1;padding:8px;border:none;border-radius:9px;background:none;color:#9CA3AF;cursor:pointer;font-size:12px;font-weight:500}
 .tab.on{background:linear-gradient(135deg,#EC4899,#7C3AED);color:#fff;font-weight:700}
-.con{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;padding-bottom:24px}
+.con{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:16px;padding-bottom:24px;scrollbar-width:none}
+.con::-webkit-scrollbar{display:none}
 /* progress */
 .prow{display:flex;justify-content:space-between;margin-bottom:6px}
 .prow span{font-size:13px;color:#6B7280}
@@ -178,10 +179,11 @@ textarea.fi{resize:none;min-height:70px}
 .ph-name{font-size:16px;font-weight:700;color:#1F2937;margin-bottom:4px}
 .ph-desc{font-size:13px;color:#6B7280;line-height:1.45;margin-bottom:6px}
 .ph-count{font-size:12px;color:#9CA3AF}
-.cyc-rec{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
-.cr-card{background:#fff;border:1px solid #FBCFE8;border-radius:12px;padding:12px}
-.cr-head{font-size:12px;font-weight:700;color:#6B7280;margin-bottom:8px}
-.cr-li{font-size:12px;color:#374151;margin:5px 0;padding-left:10px;position:relative;line-height:1.4}
+.cyc-rec{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.cr-card{background:#fff;border:1px solid #FBCFE8;border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start}
+.cr-head{font-size:13px;font-weight:700;color:#6B7280;margin-bottom:0;white-space:nowrap;min-width:90px}
+.cr-body{flex:1}
+.cr-li{font-size:13px;color:#374151;margin:3px 0;padding-left:10px;position:relative;line-height:1.4}
 .cr-li::before{content:'·';position:absolute;left:0;color:#EC4899;font-size:18px;line-height:.85}
 </style>
 </head>
@@ -1024,9 +1026,9 @@ function renderCycle(){
     var cats=[{k:'sport',l:'🏃 Спорт'},{k:'food',l:'🥗 Питание'},{k:'life',l:'🌿 Образ жизни'}];
     for(var ci=0;ci<cats.length;ci++){
       var cat=cats[ci];
-      h+='<div class="cr-card"><div class="cr-head" style="color:'+pp.color+'">'+cat.l+'</div>';
+      h+='<div class="cr-card"><div class="cr-head" style="color:'+pp.color+'">'+cat.l+'</div><div class="cr-body">';
       for(var ri=0;ri<pp[cat.k].length;ri++){h+='<div class="cr-li">'+esc(pp[cat.k][ri])+'</div>';}
-      h+='</div>';
+      h+='</div></div>';
     }
     h+='</div>';
   }
