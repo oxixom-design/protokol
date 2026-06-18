@@ -1158,7 +1158,17 @@ function getLabSorted(cat){
     return wa-wb;
   });
 }
-function setLabSearch(v){labSearch=v;renderLab();}
+function setLabSearch(v){
+  labSearch=v;
+  // Only re-render cards, not the whole tab (keeps keyboard open)
+  var cardsEl=document.getElementById('lab-cards-area');
+  if(cardsEl){
+    Object.keys(labCharts).forEach(function(k){if(labCharts[k]){labCharts[k].destroy();delete labCharts[k];}});
+    labExpanded=null;
+    cardsEl.innerHTML=renderLabCardsHtml();
+    if(labExpanded){var et=labData.tests.find(function(x){return x.id===labExpanded;});if(et&&et.values.length>1&&!et.qual)setTimeout(function(){drawLabChart(et);},100);}
+  }else{renderLab();}
+}
 function setLabCat(c){
   labCat=c;labSearch='';
   if(labExpanded){Object.keys(labCharts).forEach(function(k){if(labCharts[k]){labCharts[k].destroy();delete labCharts[k];}});labExpanded=null;}
@@ -1238,15 +1248,9 @@ function renderLabCard(t){
   }
   return'<div class="lcard'+(isWarn?' lw':'')+(isExp?' lx':'')+'" onclick="toggleLabCard(\''+t.id+'\')">'+inner+'</div>';
 }
-function renderLab(){
+function renderLabCardsHtml(){
   var wc=countLabWarns();
-  var h='<input type="search" value="'+esc(labSearch)+'" oninput="setLabSearch(this.value)" placeholder="🔍 Поиск анализа..." style="width:100%;padding:9px 14px;border:1px solid #FBCFE8;border-radius:12px;background:#fff;font-size:14px;color:#1F2937;margin-bottom:10px;outline:none;-webkit-appearance:none"/>';
-  h+='<div style="display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:12px;margin-bottom:2px">';
-  for(var ci=0;ci<LAB_CATS.length;ci++){
-    var c=LAB_CATS[ci];var on=labCat===c.id;
-    h+='<button onclick="setLabCat(\''+c.id+'\')" style="white-space:nowrap;padding:5px 11px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid '+(on?'#EC4899':'#FBCFE8')+';background:'+(on?'#EC4899':'#FFF5F9')+';color:'+(on?'#fff':'#9CA3AF')+'">'+c.l+'</button>';
-  }
-  h+='</div>';
+  var h='';
   if(wc>0)h+='<div class="lab-warn-sum">⚠ '+wc+' показател'+(wc===1?'ь':wc<5?'я':'ей')+' вне нормы</div>';
   if(labCat==='all'||labSearch){
     for(var gi=0;gi<LAB_GROUPS.length;gi++){
@@ -1261,6 +1265,17 @@ function renderLab(){
     for(var i2=0;i2<tests.length;i2++)h+=renderLabCard(tests[i2]);
   }
   h+='<button class="btn-add" onclick="openLabAdd()"><span style="font-size:18px">+</span> Добавить результат</button>';
+  return h;
+}
+function renderLab(){
+  var h='<input type="search" value="'+esc(labSearch)+'" oninput="setLabSearch(this.value)" placeholder="🔍 Поиск анализа..." style="width:100%;padding:9px 14px;border:1px solid #FBCFE8;border-radius:12px;background:#fff;font-size:14px;color:#1F2937;margin-bottom:10px;outline:none;-webkit-appearance:none"/>';
+  h+='<div style="display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:12px;margin-bottom:2px">';
+  for(var ci=0;ci<LAB_CATS.length;ci++){
+    var c=LAB_CATS[ci];var on=labCat===c.id;
+    h+='<button onclick="setLabCat(\''+c.id+'\')" style="white-space:nowrap;padding:5px 11px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid '+(on?'#EC4899':'#FBCFE8')+';background:'+(on?'#EC4899':'#FFF5F9')+';color:'+(on?'#fff':'#9CA3AF')+'">'+c.l+'</button>';
+  }
+  h+='</div>';
+  h+='<div id="lab-cards-area">'+renderLabCardsHtml()+'</div>';
   el('con').innerHTML=h;
   if(labExpanded){
     var et=labData.tests.find(function(x){return x.id===labExpanded;});
