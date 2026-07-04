@@ -1,4 +1,4 @@
-const CACHE = 'protocol-v18';
+const CACHE = 'protocol-v19';
 const BASE = '/protokol';
 
 self.addEventListener('install', e => {
