@@ -150,6 +150,9 @@ textarea.fi{resize:none;min-height:70px}
 .proto-cv{font-size:13px;font-weight:700}
 .days-row{display:flex;gap:4px;margin:10px 0}
 .day-chip{flex:1;padding:5px 0;border-radius:7px;text-align:center;font-size:10px;border:1px solid transparent}
+.acne-stat{background:#fff;border:1px solid #FBCFE8;border-radius:12px;padding:12px;text-align:center}
+.acne-stat b{display:block;font-size:20px;color:#BE185D}
+.acne-stat span{font-size:11px;color:#6B7280}
 /* cycle tab */
 .cal-card{background:#fff;border:1px solid #FBCFE8;border-radius:14px;padding:14px;margin-bottom:10px}
 .cal-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -222,7 +225,7 @@ var LS={
 };
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function el(id){return document.getElementById(id);}
-function todayStr(){return new Date().toISOString().slice(0,10);}
+function todayStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function uid(){return '_'+Math.random().toString(36).slice(2,8);}
 
 // DEFAULT DATA
@@ -277,6 +280,7 @@ var secs=LS.get('secs3',DEF_SECS);
 var checks=LS.get('chk3',{});
 var protos=LS.get('protos3',DEF_PROTOS);
 var wish=LS.get('wish3',DEF_WISH);
+var acneData=LS.get('acne_v1',{startDate:'2026-08-02',weightKg:55,targetMgKg:150,doses:[{date:'2026-08-02',caps:[16,8]},{date:'2026-09-02',caps:[16,8,8]}]});
 var cycleData=LS.get('cyc_v2',(function(){
   var days=[];
   var ranges=[['2025-12-25','2025-12-28'],['2026-02-06','2026-02-11'],['2026-03-15','2026-03-18'],['2026-04-11','2026-04-16']];
@@ -368,14 +372,20 @@ var calVM=new Date().getMonth();
 
 function saveAll(){LS.set('secs3',secs);LS.set('chk3',checks);LS.set('protos3',protos);LS.set('wish3',wish);}
 
+function acneDate(s){var p=(s||'').split('-');return p.length===3?new Date(+p[0],+p[1]-1,+p[2]):new Date(NaN);}
+function acneIso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function acneDateLabel(s){var p=(s||'').split('-');return p.length===3?p[2]+'.'+p[1]+'.'+p[0]:s;}
+function acneDoseAt(date){var doses=acneData.doses.slice().sort(function(a,b){return a.date<b.date?-1:1;}),total=0;for(var i=0;i<doses.length;i++){if(doses[i].date<=date)total=doses[i].caps.reduce(function(a,b){return a+(Number(b)||0);},0);else break;}return total;}
+function acneTotals(){var start=acneDate(acneData.startDate),today=acneDate(todayStr()),total=0;if(isNaN(start.getTime())||start>today)return{taken:0,current:0};for(var d=new Date(start);d<=today;d.setDate(d.getDate()+1))total+=acneDoseAt(acneIso(d));return{taken:total,current:acneDoseAt(todayStr())};}
+
 // RENDER HEADER
 function renderHdr(){
   var d=new Date();
   var months=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
   el('hday').textContent=DAYS[d.getDay()];
   el('hdate').textContent=d.getDate()+' '+months[d.getMonth()];
-  el('htitle').textContent=tab==='sups'?'💊 Добавки':tab==='pep'?'🧬 Пептиды':tab==='cycle'?'🌸 Цикл':tab==='lab'?'🔬 Анализы':'🛒 Купить';
-  var defs=tab==='sups'?[['today','✅ Сегодня'],['manage','⚙️ Список'],['stats','📊 Итоги']]:
+  el('htitle').textContent=tab==='sups'?(stab==='acne'?'💊 Добавки · Акнекутан':'💊 Добавки'):tab==='pep'?'🧬 Пептиды':tab==='cycle'?'🌸 Цикл':tab==='lab'?'🔬 Анализы':'🛒 Купить';
+  var defs=tab==='sups'?[['today','✅ Сегодня'],['manage','⚙️ Список'],['stats','📊 Итоги'],['acne','💊 Акнекутан']]:
            tab==='pep'?[['active','✅ Активные'],['paused','⏸️ Пауза'],['finished','🏁 История'],['manage','⚙️']]:
            tab==='cycle'?[]:tab==='lab'?[]:
            [['today','🛒 Список'],['bought','✅ Куплено']];
@@ -390,14 +400,23 @@ function renderHdr(){
     '<button class="bnav-btn" onclick="setTab(\'cycle\')"><span class="bnav-ic">🌸</span><span class="bnav-lb'+(tab==='cycle'?' on':'')+'">Цикл</span>'+(tab==='cycle'?'<div class="bnav-dot"></div>':'')+'</button>'+
     '<button class="bnav-btn" onclick="setTab(\'lab\')"><span class="bnav-ic">🔬</span><span class="bnav-lb'+(tab==='lab'?' on':'')+'">Анализы</span>'+(tab==='lab'?'<div class="bnav-dot"></div>':'')+'</button>'+
     '<button class="bnav-btn" onclick="setTab(\'wish\')"><span class="bnav-ic">🛒</span><span class="bnav-lb'+(tab==='wish'?' on':'')+'">Купить</span>'+(tab==='wish'?'<div class="bnav-dot"></div>':'')+'</button>';
-  el('fab').style.display=(tab==='cycle')?'none':(tab==='pep'||tab==='lab')?'flex':(stab==='today'||stab==='manage')?'flex':'none';
+  el('fab').style.display=(tab==='cycle'||(tab==='sups'&&stab==='acne'))?'none':(tab==='pep'||tab==='lab')?'flex':(stab==='today'||stab==='manage')?'flex':'none';
 }
 
 // SUPPLEMENTS
 function renderSups(){
   var h='';
   var tod=todayStr();
-  if(stab==='today'){
+  if(stab==='acne'){
+    var at=acneTotals(),goal=Math.max(0,Number(acneData.weightKg)||0)*Math.max(0,Number(acneData.targetMgKg)||0),left=Math.max(0,goal-at.taken),pct=goal?Math.min(100,at.taken/goal*100):0,days=at.current>0?Math.ceil(left/at.current):null;
+    h+='<div class="card" style="background:linear-gradient(135deg,#FCE7F3,#EEF2FF);text-align:center"><div style="font-size:13px;color:#6B7280;margin-bottom:6px">Кумулятивная доза</div><div style="font-size:29px;font-weight:800;color:#1F2937">'+Math.round(at.taken)+' / '+Math.round(goal)+' мг</div><div style="font-size:12px;color:#6B7280;margin-top:3px">из расчёта '+esc(acneData.targetMgKg)+' мг/кг × '+esc(acneData.weightKg)+' кг</div><div class="bar" style="height:10px;margin:14px 0 5px"><div class="fill" style="width:'+pct.toFixed(1)+'%"></div></div><div style="font-size:13px;font-weight:700;color:#BE185D">'+pct.toFixed(1)+'%</div></div>';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px"><div class="acne-stat"><b>'+Math.round(left)+' мг</b><span>осталось</span></div><div class="acne-stat"><b>'+(days===null?'—':days+' дн.')+'</b><span>примерно до цели*</span></div><div class="acne-stat"><b>'+at.current+' мг</b><span>текущая доза в день</span></div><div class="acne-stat"><b>'+esc(acneDateLabel(acneData.startDate))+'</b><span>дата начала</span></div></div>';
+    h+='<div class="card"><div style="font-size:13px;font-weight:700;color:#1F2937;margin-bottom:8px">Дозировки по периодам</div>';
+    var ds=acneData.doses.slice().sort(function(a,b){return a.date<b.date?-1:1;});for(var ai=0;ai<ds.length;ai++){var sum=ds[ai].caps.reduce(function(a,b){return a+(Number(b)||0);},0);h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid #FCE7F3"><div><b style="font-size:13px;color:#1F2937">с '+esc(acneDateLabel(ds[ai].date))+'</b><div style="font-size:12px;color:#6B7280">'+ds[ai].caps.map(function(x){return esc(x)+' мг';}).join(' + ')+' = '+sum+' мг/день</div></div><button class="iedit" onclick="openAcneDose('+ai+')">✏️</button></div>';}
+    h+='<button class="btn-add" style="margin:10px 0 0" onclick="openAcneDose(-1)">＋ Изменить дозировку с даты</button></div>';
+    h+='<div class="card"><div style="font-size:13px;font-weight:700;margin-bottom:8px">Параметры курса</div><div style="font-size:12px;color:#6B7280;margin-bottom:10px">Измени вес, целевую дозу или дату начала.</div><button class="btn-sec" onclick="openAcneSettings()">⚙️ Настроить параметры</button></div>';
+    h+='<div style="font-size:11px;color:#9CA3AF;line-height:1.5;padding:0 4px">*Расчёт предполагает ежедневный приём указанной дозы без пропусков и использует последнюю дозировку. Это учёт по заданным параметрам, не рекомендация по лечению.</div>';
+  } else if(stab==='today'){
     var allAct=[];
     for(var si=0;si<secs.length;si++){for(var ii=0;ii<secs[si].items.length;ii++){if(secs[si].items[ii].st==='active')allAct.push(secs[si].items[ii]);}}
     var done=0;for(var di=0;di<allAct.length;di++){if(checks[tod+'_'+allAct[di].id])done++;}
@@ -615,6 +634,20 @@ function render(){
 // ACTIONS
 function setTab(t){tab=t;stab=(t==='pep'?'active':'today');openSec=null;if(t==='cycle'){calVY=new Date().getFullYear();calVM=new Date().getMonth();}if(t==='lab'){labCat='all';if(labExpanded){Object.keys(labCharts).forEach(function(k){if(labCharts[k]){labCharts[k].destroy();delete labCharts[k];}});labExpanded=null;}}render();}
 function setStab(s){stab=s;render();}
+function openAcneDose(index){
+  var existing=index>=0?acneData.doses.slice().sort(function(a,b){return a.date<b.date?-1:1;})[index]:null;
+  modType='acne-dose';modData={index:index,oldDate:existing?existing.date:null};
+  el('mod-title').textContent=existing?'Изменить дозировку':'Новая дозировка';
+  var d=existing||{date:todayStr(),caps:[]};var h='<div class="fg"><label class="fl">Действует с этой даты</label><input class="fi" type="date" id="ac-date" value="'+esc(d.date)+'"></div>';
+  for(var i=0;i<3;i++)h+='<div class="fg"><label class="fl">'+(i===0?'Капсула 1':i===1?'Капсула 2':'Капсула 3 (если нужна)')+', мг</label><input class="fi" type="number" min="0" step="0.1" id="ac-cap'+i+'" value="'+(d.caps[i]||'')+'" placeholder="'+(i===0?'16':'0')+'"></div>';
+  h+='<button class="btn-pri" onclick="saveAcneDose()">Сохранить дозировку</button>';
+  if(existing)h+='<button class="btn-del" onclick="deleteAcneDose()">Удалить этот период</button>';
+  el('mod-body').innerHTML=h;el('modal').classList.add('show');
+}
+function saveAcneDose(){var date=el('ac-date').value,caps=[];for(var i=0;i<3;i++){var v=parseFloat(el('ac-cap'+i).value)||0;if(v>0)caps.push(v);}if(!date||!caps.length){alert('Укажи дату и хотя бы одну дозировку больше нуля.');return;}if(date<acneData.startDate){alert('Дата дозировки не может быть раньше даты начала курса.');return;}var old=modData.oldDate;if(old)acneData.doses=acneData.doses.filter(function(x){return x.date!==old;});acneData.doses=acneData.doses.filter(function(x){return x.date!==date;});acneData.doses.push({date:date,caps:caps});acneData.doses.sort(function(a,b){return a.date<b.date?-1:1;});LS.set('acne_v1',acneData);closeMod();render();}
+function deleteAcneDose(){var old=modData.oldDate;acneData.doses=acneData.doses.filter(function(x){return x.date!==old;});LS.set('acne_v1',acneData);closeMod();render();}
+function openAcneSettings(){modType='acne-settings';el('mod-title').textContent='Параметры курса';var h='<div class="fg"><label class="fl">Дата начала</label><input class="fi" type="date" id="ac-start" value="'+esc(acneData.startDate)+'"></div><div class="fg"><label class="fl">Вес, кг</label><input class="fi" type="number" min="1" step="0.1" id="ac-weight" value="'+esc(acneData.weightKg)+'"></div><div class="fg"><label class="fl">Целевая доза, мг на 1 кг</label><input class="fi" type="number" min="1" step="1" id="ac-target" value="'+esc(acneData.targetMgKg)+'"></div><button class="btn-pri" onclick="saveAcneSettings()">Сохранить</button>';el('mod-body').innerHTML=h;el('modal').classList.add('show');}
+function saveAcneSettings(){var start=el('ac-start').value,weight=parseFloat(el('ac-weight').value),target=parseFloat(el('ac-target').value);if(!start||!weight||weight<=0||!target||target<=0){alert('Проверь дату начала, вес и целевую дозу.');return;}if(acneData.doses.some(function(x){return x.date<start;})){alert('Дата начала не может быть позже уже внесённых дозировок. Сначала поправь их даты.');return;}acneData.startDate=start;acneData.weightKg=weight;acneData.targetMgKg=target;LS.set('acne_v1',acneData);closeMod();render();}
 function toggleSec(id){openSec=(openSec===id?null:id);renderSups();}
 function toggleItem(id){
   var k=todayStr()+'_'+id;
@@ -1369,7 +1402,7 @@ function openBackup(){
   el('modal').classList.add('show');
 }
 function exportData(){
-  var data={v:2,date:new Date().toISOString(),secs:secs,checks:checks,protos:protos,wish:wish,cyc:cycleData,lab:labData};
+  var data={v:3,date:new Date().toISOString(),secs:secs,checks:checks,protos:protos,wish:wish,cyc:cycleData,lab:labData,acne:acneData};
   var json=JSON.stringify(data);
   var blob=new Blob([json],{type:'application/json'});
   var url=URL.createObjectURL(blob);
@@ -1397,6 +1430,7 @@ function importData(){
         if(d.wish){wish=d.wish;LS.set('wish3',wish);}
         if(d.cyc){cycleData=d.cyc;LS.set('cyc_v2',cycleData);}
         if(d.lab){labData=d.lab;LS.set('lab_v1',labData);}
+        if(d.acne){acneData=d.acne;LS.set('acne_v1',acneData);}
         closeMod();render();
         setTimeout(function(){alert('✅ Данные успешно восстановлены!');},300);
       }catch(err){alert('❌ Ошибка: неверный формат файла');}
