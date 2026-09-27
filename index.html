@@ -356,6 +356,50 @@ var DEF_LAB={tests:[
   {id:'transf',cat:'vit',name:'Трансферрин',unit:'г/л',lo:2.0,hi:3.6,values:[{d:'2025-06-13',v:2.88},{d:'2026-06-19',v:2.68}]}
 ]};
 var labData=LS.get('lab_v1',null)||JSON.parse(JSON.stringify(DEF_LAB));
+function mergeImportedLabs(){
+  if(LS.get('lab_import_2026_07_16_09_10',false))return;
+  var defs={
+    urea:{cat:'bio',name:'Мочевина',unit:'ммоль/л',lo:2.6,hi:6.7},alp:{cat:'bio',name:'Щелочная фосфатаза',unit:'Ед/л',lo:35,hi:105},
+    athero:{cat:'bio',name:'Индекс атерогенности',unit:'',lo:0,hi:3},
+    albumin:{cat:'bio',name:'Альбумин',unit:'г/л',lo:35,hi:52},ldh:{cat:'bio',name:'ЛДГ',unit:'Ед/л',lo:0,hi:250},
+    calcium:{cat:'bio',name:'Кальций общий',unit:'ммоль/л',lo:2.15,hi:2.5},
+    phosphorus:{cat:'bio',name:'Фосфор неорганический',unit:'ммоль/л',lo:0.81,hi:1.45},magnesium:{cat:'bio',name:'Магний',unit:'ммоль/л',lo:0.66,hi:1.07},
+    potassium:{cat:'bio',name:'Калий ионизированный',unit:'ммоль/л',lo:3.5,hi:5.1},sodium:{cat:'bio',name:'Натрий ионизированный',unit:'ммоль/л',lo:135,hi:145},
+    chloride:{cat:'bio',name:'Хлор ионизированный',unit:'ммоль/л',lo:98,hi:107},amylase:{cat:'bio',name:'Альфа-амилаза',unit:'Ед/л',lo:28,hi:100},
+    ggt:{cat:'bio',name:'ГГТ',unit:'Ед/л',lo:6,hi:42},crp:{cat:'bio',name:'С-реактивный белок',unit:'мг/л',lo:0,hi:5},
+    free_test_direct:{cat:'horm',name:'Тестостерон свободный',unit:'пг/мл',lo:0,hi:1.7},free_test_calc:{cat:'horm',name:'Свободный тестостерон (расчётный)',unit:'нмоль/л',lo:0.001,hi:0.034},
+    mch:{cat:'blood',name:'MCH (среднее содержание гемоглобина)',unit:'пг',lo:27,hi:34},mchc:{cat:'blood',name:'MCHC (средняя концентрация гемоглобина)',unit:'г/л',lo:300,hi:380}
+  };
+  var update={
+    estrad:[{d:'2026-07-16',v:102.6,source:'376.8 пмоль/л → 102.6 пг/мл'}],
+    alt:[{d:'2026-07-16',v:18.4},{d:'2026-09-10',v:14.5}],ast:[{d:'2026-07-16',v:19},{d:'2026-09-10',v:18}],
+    chol:[{d:'2026-07-16',v:4.59},{d:'2026-09-10',v:4.61}],bilir:[{d:'2026-07-16',v:5.8},{d:'2026-09-10',v:17.77}],
+    creat:[{d:'2026-07-16',v:69},{d:'2026-09-10',v:70.88}],urea:[{d:'2026-07-16',v:4.3},{d:'2026-09-10',v:4.45}],
+    alp:[{d:'2026-07-16',v:47},{d:'2026-09-10',v:39}],albumin:[{d:'2026-07-16',v:45.4}],ldh:[{d:'2026-07-16',v:156}],
+    glu:[{d:'2026-07-16',v:5.05}],prot:[{d:'2026-07-16',v:72.9}],bild:[{d:'2026-07-16',v:2.9}],
+    hdl:[{d:'2026-07-16',v:1.93}],athero:[{d:'2026-07-16',v:1.378}],ldl:[{d:'2026-07-16',v:2.51}],trig:[{d:'2026-07-16',v:0.45}],
+    calcium:[{d:'2026-07-16',v:2.43}],phosphorus:[{d:'2026-07-16',v:1.43}],potassium:[{d:'2026-07-16',v:5.67}],
+    sodium:[{d:'2026-07-16',v:144}],chloride:[{d:'2026-07-16',v:106.2}],magnesium:[{d:'2026-07-16',v:0.82}],
+    iron:[{d:'2026-07-16',v:12.01}],amylase:[{d:'2026-07-16',v:121}],ggt:[{d:'2026-07-16',v:20}],uric:[{d:'2026-07-16',v:175}],
+    crp:[{d:'2026-07-16',v:0.6,lt:true}],tsh:[{d:'2026-07-16',v:1.12}],prolact:[{d:'2026-07-16',v:338.8}],
+    lh:[{d:'2026-07-16',v:8.03}],fsh:[{d:'2026-07-16',v:9.58}],ttest:[{d:'2026-07-16',v:0.646}],
+    gspg:[{d:'2026-07-16',v:171.7}],ohp17:[{d:'2026-07-16',v:0.49}],deas:[{d:'2026-07-16',v:2.5}],
+    insulin:[{d:'2026-07-16',v:7.68,source:'46.09 пмоль/л → 7.68 мкЕд/мл (коэффициент 6)'}],homa:[{d:'2026-07-16',v:1.49}],
+    free_test_direct:[{d:'2026-07-16',v:0.4}],free_test_calc:[{d:'2026-07-16',v:0.0033}],
+    leu:[{d:'2026-09-10',v:7.01}],rbc:[{d:'2026-09-10',v:4.95}],hgb:[{d:'2026-09-10',v:146}],
+    hct:[{d:'2026-09-10',v:42.8}],mcv:[{d:'2026-09-10',v:86.5}],mch:[{d:'2026-09-10',v:29.5}],mchc:[{d:'2026-09-10',v:341}],
+    plt:[{d:'2026-09-10',v:315}]
+  };
+  Object.keys(update).forEach(function(id){
+    var test=labData.tests.find(function(t){return t.id===id;});
+    if(!test){var def=defs[id];if(!def)return;test={id:id,cat:def.cat,name:def.name,unit:def.unit,lo:def.lo,hi:def.hi,values:[]};labData.tests.push(test);}
+    if(!test.values)test.values=[];
+    update[id].forEach(function(item){if(!test.values.some(function(v){return v.d===item.d;}))test.values.push(item);});
+    test.values.sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:0;});
+  });
+  LS.set('lab_v1',labData);LS.set('lab_import_2026_07_16_09_10',true);
+}
+mergeImportedLabs();
 var labCat='all';
 var labExpanded=null;
 var labCharts={};
@@ -1259,7 +1303,7 @@ function drawLabChart(t){
 function renderLabCard(t){
   var st=labStatus(t);var lm=t.values[t.values.length-1];
   var isExp=labExpanded===t.id;var isWarn=st==='hi'||st==='lo';
-  var valStr=t.qual?lm.v:(lm.v+' '+t.unit);
+  var valStr=t.qual?lm.v:((lm.lt?'< ':'')+lm.v+' '+t.unit);
   var pct=50;
   if(!t.qual&&typeof lm.v==='number'&&t.hi){pct=Math.min(100,Math.max(0,((lm.v-(t.lo||0))/(t.hi-(t.lo||0)))*100));}
   var barC=st==='ok'?'#059669':'#DC2626';
@@ -1268,6 +1312,7 @@ function renderLabCard(t){
     +(t.refN?'<div style="font-size:10px;color:#9CA3AF;font-style:italic">'+esc(t.refN)+'</div>':'')
     +'<div style="font-size:10px;color:#9CA3AF">'+fmtDate(lm.d)+'</div></div>'
     +'<div style="text-align:right"><div style="font-size:14px;font-weight:500;color:'+(st==='hi'?'#DC2626':st==='lo'?'#2563EB':'#1F2937')+'">'+esc(valStr)+'</div>'
+    +(lm.source?'<div style="font-size:9px;color:#9CA3AF">'+esc(lm.source)+'</div>':'')
     +(t.qual?'':'<div style="font-size:10px;color:#9CA3AF">норма: '+(t.lo>0?t.lo+'–':'')+t.hi+(t.unit?' '+t.unit:'')+'</div>')
     +'</div></div>';
   if(!t.qual)inner+='<div style="height:3px;background:#E5E7EB;border-radius:2px;margin-top:7px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+barC+';border-radius:2px"></div></div>';
@@ -1287,7 +1332,7 @@ function renderLabCard(t){
       var mw=ms!=='ok';
       inner+='<div class="lab-hist" style="background:'+(mw?'#FEE2E2':'#F9FAFB')+'">'
         +'<span style="color:#6B7280">'+fmtDate(m.d)+'</span>'
-        +'<span style="font-weight:500;color:'+(mw?'#DC2626':'#1F2937')+'">'+esc(String(m.v))+' '+esc(t.unit||'')+'</span></div>';
+        +'<span style="font-weight:500;color:'+(mw?'#DC2626':'#1F2937')+'">'+esc((m.lt?'< ':'')+String(m.v))+' '+esc(t.unit||'')+(m.source?' <small style="color:#9CA3AF">('+esc(m.source)+')</small>':'')+'</span></div>';
     }
     if(t.values.length>1&&!t.qual)inner+='<div class="lab-chart"><canvas id="lch-'+t.id+'" role="img" aria-label="График '+esc(t.name)+'"></canvas></div>';
     if(t.recs&&t.recs.length){
